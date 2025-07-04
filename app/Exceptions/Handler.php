@@ -27,4 +27,42 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    public function render($request, Throwable $exception)
+    {
+        if ($request->is('api/*')) {
+            $status = 500;
+            $message = 'Erro interno do servidor';
+
+            if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+                $status = 401;
+                $message = 'Unauthorized';
+            } elseif ($exception instanceof \Illuminate\Auth\Access\AuthorizationException) {
+                $status = 403;
+                $message = 'Forbidden';
+            } elseif ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                $status = 404;
+                $message = 'Not Found';
+            } elseif ($exception instanceof \Illuminate\Validation\ValidationException) {
+                $status = 422;
+                $message = 'Validation Error';
+                return response()->json([
+                    'statusCode' => $status,
+                    'message' => $message,
+                    'errors' => $exception->errors(),
+                    'timestamp' => now()->toIso8601String(),
+                    'path' => $request->path(),
+                ], $status);
+            }
+
+            return response()->json([
+                'statusCode' => $status,
+                'message' => $message,
+                'timestamp' => now()->toIso8601String(),
+                'path' => $request->path(),
+            ], $status);
+        }
+
+        return parent::render($request, $exception);
+    }
 }
