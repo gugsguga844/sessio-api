@@ -27,8 +27,8 @@ WORKDIR /var/www
 # Copiar apenas composer.json e composer.lock primeiro
 COPY composer.json composer.lock ./
 
-# Instalar dependências PHP sem scripts
-RUN composer install --no-dev --no-scripts --no-autoloader
+# Instalar dependências PHP incluindo dev (para Sanctum)
+RUN composer install --no-scripts --no-autoloader
 
 # Copiar o resto dos arquivos
 COPY . .
