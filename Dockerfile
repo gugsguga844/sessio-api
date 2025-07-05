@@ -33,6 +33,9 @@ RUN composer install --no-scripts --no-autoloader
 # Copiar o resto dos arquivos
 COPY . .
 
+# Criar arquivo .env se não existir
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
 # Gerar autoloader
 RUN composer dump-autoload --optimize
 
