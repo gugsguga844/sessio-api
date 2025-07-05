@@ -55,8 +55,16 @@ RUN php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
 
+# Gerar documentação Swagger
+RUN php artisan l5-swagger:generate
+
 # Expor porta
 EXPOSE 8000
 
+# Script de inicialização
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Comando para iniciar a aplicação
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"] 
