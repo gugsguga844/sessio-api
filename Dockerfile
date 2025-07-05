@@ -18,8 +18,8 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Instalar extensões PHP
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Instalar Composer versão mais recente
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Definir diretório de trabalho
 WORKDIR /var/www
@@ -27,8 +27,8 @@ WORKDIR /var/www
 # Copiar arquivos do projeto
 COPY . /var/www
 
-# Instalar dependências PHP
-RUN composer install --no-dev --optimize-autoloader
+# Instalar dependências PHP com versão específica do Composer
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Instalar dependências Node.js (se necessário)
 RUN npm install
