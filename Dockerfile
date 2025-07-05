@@ -24,11 +24,17 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Definir diretório de trabalho
 WORKDIR /var/www
 
-# Copiar arquivos do projeto
-COPY . /var/www
+# Copiar apenas composer.json e composer.lock primeiro
+COPY composer.json composer.lock ./
 
-# Instalar dependências PHP com versão específica do Composer
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# Instalar dependências PHP sem scripts
+RUN composer install --no-dev --no-scripts --no-autoloader
+
+# Copiar o resto dos arquivos
+COPY . .
+
+# Gerar autoloader
+RUN composer dump-autoload --optimize
 
 # Instalar dependências Node.js (se necessário)
 RUN npm install
