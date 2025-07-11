@@ -59,4 +59,13 @@ class ImageUploadController extends Controller
             'url' => $url,
         ]);
     }
+
+    public function update(Request $request)
+    {
+        $validated = $request->validate([
+            'image' => 'required|image|max:2048',
+        ]);
+        
+        
+    }
 } 
