@@ -19,15 +19,20 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "name",
+                                    "full_name",
                                     "email",
                                     "password",
                                     "password_confirmation"
                                 ],
                                 "properties": {
-                                    "name": {
+                                    "full_name": {
                                         "type": "string",
                                         "example": "Maria Silva"
+                                    },
+                                    "professional_title": {
+                                        "type": "string",
+                                        "example": "Dra.",
+                                        "nullable": true
                                     },
                                     "email": {
                                         "type": "string",
@@ -40,6 +45,26 @@
                                     "password_confirmation": {
                                         "type": "string",
                                         "example": "senha123"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+5511999999999"
+                                    },
+                                    "specialty": {
+                                        "type": "string",
+                                        "example": "Psicóloga Clínica"
+                                    },
+                                    "professional_license": {
+                                        "type": "string",
+                                        "example": "CRP 06/123456"
+                                    },
+                                    "cpf_nif": {
+                                        "type": "string",
+                                        "example": "123.456.789-00"
+                                    },
+                                    "office_address": {
+                                        "type": "string",
+                                        "example": "Rua Exemplo, 123 - São Paulo/SP"
                                     }
                                 },
                                 "type": "object"
@@ -49,10 +74,47 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Usuário registrado com sucesso"
+                        "description": "Usuário registrado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abcdef123456"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Dados inválidos"
+                        "description": "Dados inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Os dados fornecidos são inválidos."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "email": [
+                                                    "O email já está em uso."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -62,7 +124,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Login do usuário",
+                "summary": "Autenticar usuário e obter token",
                 "operationId": "a3b306d14572d1f4bd6c064b3233e7b8",
                 "requestBody": {
                     "required": true,
@@ -90,10 +152,39 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Login realizado com sucesso"
+                        "description": "Login realizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abcdef123456"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
-                    "422": {
-                        "description": "Dados inválidos"
+                    "401": {
+                        "description": "Credenciais inválidas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "As credenciais fornecidas estão incorretas."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -103,16 +194,74 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Logout do usuário autenticado",
+                "summary": "Desconectar usuário (revogar token)",
                 "operationId": "fe8f3429cd6979b3b4517e186505f9f9",
                 "responses": {
                     "200": {
-                        "description": "Logout realizado com sucesso"
+                        "description": "Logout realizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logout realizado com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Não autenticado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Obter informações do usuário autenticado",
+                "operationId": "9d9bc556f927575aa492a88c28fe5908",
+                "responses": {
+                    "200": {
+                        "description": "Informações do usuário",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
                     }
                 ]
             }
@@ -156,19 +305,37 @@
                                     },
                                     "email": {
                                         "type": "string",
+                                        "format": "email",
                                         "example": "joao@email.com"
                                     },
                                     "phone": {
                                         "type": "string",
                                         "example": "(11) 99999-9999"
                                     },
+                                    "birth_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "cpf_nif": {
+                                        "type": "string",
+                                        "example": "123.456.789-00"
+                                    },
+                                    "emergency_contact": {
+                                        "type": "string",
+                                        "example": "Maria Silva - (11) 99999-8888"
+                                    },
+                                    "case_summary": {
+                                        "type": "string",
+                                        "example": "Paciente em acompanhamento desde 2024, apresentando melhora progressiva."
+                                    },
                                     "status": {
                                         "type": "string",
                                         "enum": [
-                                            "active",
-                                            "inactive"
+                                            "Active",
+                                            "Inactive"
                                         ],
-                                        "example": "active"
+                                        "example": "Active"
                                     }
                                 },
                                 "type": "object"
@@ -333,13 +500,23 @@
         "/api/events": {
             "get": {
                 "tags": [
-                    "Events"
+                    "Sessions"
                 ],
-                "summary": "Listar todos os eventos do usuário autenticado",
+                "summary": "Listar todas as sessões do usuário autenticado",
                 "operationId": "7058ab7c89d20c752b6afd6d808f6526",
                 "responses": {
                     "200": {
-                        "description": "Lista de eventos"
+                        "description": "Lista de sessões",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Event"
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -350,70 +527,30 @@
             },
             "post": {
                 "tags": [
-                    "Events"
+                    "Sessions"
                 ],
-                "summary": "Criar novo evento",
+                "summary": "Criar nova sessão",
                 "operationId": "508895e03d7f10edac84357084c87b20",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "client_id",
-                                    "start_time",
-                                    "end_time",
-                                    "type",
-                                    "payment_status"
-                                ],
-                                "properties": {
-                                    "client_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "title": {
-                                        "type": "string",
-                                        "example": "Sessão de terapia"
-                                    },
-                                    "start_time": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-07-04T10:00:00"
-                                    },
-                                    "end_time": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-07-04T11:00:00"
-                                    },
-                                    "notes": {
-                                        "type": "string",
-                                        "example": "Paciente ansioso"
-                                    },
-                                    "type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "presencial",
-                                            "online"
-                                        ],
-                                        "example": "presencial"
-                                    },
-                                    "payment_status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "pago",
-                                            "pendente"
-                                        ],
-                                        "example": "pendente"
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/EventRequest"
                             }
                         }
                     }
                 },
                 "responses": {
                     "201": {
-                        "description": "Evento criado com sucesso"
+                        "description": "Sessão criada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Event"
+                                }
+                            }
+                        }
                     },
                     "409": {
                         "description": "Conflito de horário"
@@ -432,14 +569,15 @@
         "/api/events/{id}": {
             "get": {
                 "tags": [
-                    "Events"
+                    "Sessions"
                 ],
-                "summary": "Exibir um evento específico",
+                "summary": "Exibir uma sessão específica",
                 "operationId": "6f743f71f7a88dbe57be1d9c9ebf47cb",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID da sessão",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -448,13 +586,20 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Dados do evento"
+                        "description": "Dados da sessão",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Event"
+                                }
+                            }
+                        }
                     },
                     "403": {
                         "description": "Acesso negado"
                     },
                     "404": {
-                        "description": "Evento não encontrado"
+                        "description": "Sessão não encontrada"
                     }
                 },
                 "security": [
@@ -465,14 +610,15 @@
             },
             "put": {
                 "tags": [
-                    "Events"
+                    "Sessions"
                 ],
-                "summary": "Atualizar um evento",
+                "summary": "Atualizar uma sessão",
                 "operationId": "fb130dcf1ab4d7abbd3a173741df1f8f",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID da sessão",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -484,70 +630,30 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "client_id",
-                                    "start_time",
-                                    "end_time",
-                                    "type",
-                                    "payment_status"
-                                ],
-                                "properties": {
-                                    "client_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "title": {
-                                        "type": "string",
-                                        "example": "Sessão de terapia"
-                                    },
-                                    "start_time": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-07-04T10:00:00"
-                                    },
-                                    "end_time": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-07-04T11:00:00"
-                                    },
-                                    "notes": {
-                                        "type": "string",
-                                        "example": "Paciente ansioso"
-                                    },
-                                    "type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "presencial",
-                                            "online"
-                                        ],
-                                        "example": "presencial"
-                                    },
-                                    "payment_status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "pago",
-                                            "pendente"
-                                        ],
-                                        "example": "pendente"
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/EventRequest"
                             }
                         }
                     }
                 },
                 "responses": {
                     "200": {
-                        "description": "Evento atualizado com sucesso"
-                    },
-                    "409": {
-                        "description": "Conflito de horário"
+                        "description": "Sessão atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Event"
+                                }
+                            }
+                        }
                     },
                     "403": {
                         "description": "Acesso negado"
                     },
                     "404": {
-                        "description": "Evento não encontrado"
+                        "description": "Sessão não encontrada"
+                    },
+                    "409": {
+                        "description": "Conflito de horário"
                     },
                     "422": {
                         "description": "Dados inválidos"
@@ -561,14 +667,15 @@
             },
             "delete": {
                 "tags": [
-                    "Events"
+                    "Sessions"
                 ],
-                "summary": "Deletar um evento",
+                "summary": "Excluir uma sessão",
                 "operationId": "b8c8f4b41a32532f5e9f7146e511bc61",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID da sessão",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -577,13 +684,26 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Evento deletado com sucesso"
+                        "description": "Sessão excluída com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sessão excluída com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "403": {
                         "description": "Acesso negado"
                     },
                     "404": {
-                        "description": "Evento não encontrado"
+                        "description": "Sessão não encontrada"
                     }
                 },
                 "security": [
@@ -596,14 +716,15 @@
         "/api/calendar-items": {
             "get": {
                 "tags": [
-                    "Events"
+                    "Calendar"
                 ],
-                "summary": "Listar todos os itens do calendário (eventos e bloqueios) em um período",
+                "summary": "Listar todos os itens do calendário (sessões e bloqueios) em um período",
                 "operationId": "fadf19ba42f735ddf6195f0ec7612b78",
                 "parameters": [
                     {
                         "name": "start",
                         "in": "query",
+                        "description": "Data de início do período (YYYY-MM-DD)",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -613,6 +734,7 @@
                     {
                         "name": "end",
                         "in": "query",
+                        "description": "Data de término do período (YYYY-MM-DD)",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -622,7 +744,34 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de itens do calendário"
+                        "description": "Lista de itens do calendário",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "item_type": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "session",
+                                                    "block"
+                                                ]
+                                            }
+                                        },
+                                        "type": "object",
+                                        "oneOf": [
+                                            {
+                                                "$ref": "#/components/schemas/Event"
+                                            },
+                                            {
+                                                "$ref": "#/components/schemas/TimeBlock"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     },
                     "422": {
                         "description": "Dados inválidos"
@@ -635,16 +784,89 @@
                 ]
             }
         },
+        "/upload-image": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Faz upload de uma imagem para o S3 e retorna a URL pública",
+                "operationId": "b77824c7af4c58f982763f09a5f5a43c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "image"
+                                ],
+                                "properties": {
+                                    "image": {
+                                        "description": "Arquivo de imagem para upload",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Upload realizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "url": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/time-blocks": {
             "get": {
                 "tags": [
                     "TimeBlocks"
                 ],
-                "summary": "Listar todos os bloqueios de tempo do usuário autenticado",
+                "summary": "Listar todos os blocos de tempo do usuário autenticado",
                 "operationId": "069896b70026ccc2898feadcf31ab748",
                 "responses": {
                     "200": {
-                        "description": "Lista de bloqueios de tempo"
+                        "description": "Lista de blocos de tempo",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TimeBlock"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado"
                     }
                 },
                 "security": [
@@ -657,7 +879,7 @@
                 "tags": [
                     "TimeBlocks"
                 ],
-                "summary": "Criar novo bloqueio de tempo",
+                "summary": "Criar um novo bloco de tempo",
                 "operationId": "258a08b2f3bcec99b68b62e051a6a233",
                 "requestBody": {
                     "required": true,
@@ -672,21 +894,29 @@
                                 "properties": {
                                     "title": {
                                         "type": "string",
+                                        "maxLength": 100,
                                         "example": "Almoço"
                                     },
                                     "start_time": {
                                         "type": "string",
                                         "format": "date-time",
-                                        "example": "2024-07-04T12:00:00"
+                                        "example": "2023-01-01T12:00:00-03:00"
                                     },
                                     "end_time": {
                                         "type": "string",
                                         "format": "date-time",
-                                        "example": "2024-07-04T13:00:00"
+                                        "example": "2023-01-01T13:00:00-03:00"
                                     },
-                                    "color": {
+                                    "color_hex": {
                                         "type": "string",
-                                        "example": "#FF0000"
+                                        "example": "#FF5733",
+                                        "nullable": true
+                                    },
+                                    "emoji": {
+                                        "type": "string",
+                                        "maxLength": 5,
+                                        "example": "🍽️",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -696,10 +926,20 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Bloqueio criado com sucesso"
+                        "description": "Bloco de tempo criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TimeBlock"
+                                }
+                            }
+                        }
                     },
-                    "409": {
-                        "description": "Conflito de horário"
+                    "401": {
+                        "description": "Não autorizado"
+                    },
+                    "403": {
+                        "description": "Acesso negado"
                     },
                     "422": {
                         "description": "Dados inválidos"
@@ -717,27 +957,39 @@
                 "tags": [
                     "TimeBlocks"
                 ],
-                "summary": "Exibir um bloqueio de tempo específico",
+                "summary": "Exibir um bloco de tempo específico",
                 "operationId": "f3f25a9f9e3c1fb6f8a3c2e070cc355b",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID do bloco de tempo",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Dados do bloqueio de tempo"
+                        "description": "Bloco de tempo encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TimeBlock"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado"
                     },
                     "403": {
                         "description": "Acesso negado"
                     },
                     "404": {
-                        "description": "Bloqueio não encontrado"
+                        "description": "Bloco de tempo não encontrado"
                     }
                 },
                 "security": [
@@ -750,15 +1002,17 @@
                 "tags": [
                     "TimeBlocks"
                 ],
-                "summary": "Atualizar um bloqueio de tempo",
+                "summary": "Atualizar um bloco de tempo existente",
                 "operationId": "fa71f98625fff5863830663fd837f975",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID do bloco de tempo",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
@@ -775,21 +1029,29 @@
                                 "properties": {
                                     "title": {
                                         "type": "string",
-                                        "example": "Almoço"
+                                        "maxLength": 100,
+                                        "example": "Almoço Atualizado"
                                     },
                                     "start_time": {
                                         "type": "string",
                                         "format": "date-time",
-                                        "example": "2024-07-04T12:00:00"
+                                        "example": "2023-01-01T12:30:00-03:00"
                                     },
                                     "end_time": {
                                         "type": "string",
                                         "format": "date-time",
-                                        "example": "2024-07-04T13:00:00"
+                                        "example": "2023-01-01T13:30:00-03:00"
                                     },
-                                    "color": {
+                                    "color_hex": {
                                         "type": "string",
-                                        "example": "#FF0000"
+                                        "example": "#FF5733",
+                                        "nullable": true
+                                    },
+                                    "emoji": {
+                                        "type": "string",
+                                        "maxLength": 5,
+                                        "example": "🍽️",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -799,16 +1061,23 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Bloqueio atualizado com sucesso"
+                        "description": "Bloco de tempo atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TimeBlock"
+                                }
+                            }
+                        }
                     },
-                    "409": {
-                        "description": "Conflito de horário"
+                    "401": {
+                        "description": "Não autorizado"
                     },
                     "403": {
                         "description": "Acesso negado"
                     },
                     "404": {
-                        "description": "Bloqueio não encontrado"
+                        "description": "Bloco de tempo não encontrado"
                     },
                     "422": {
                         "description": "Dados inválidos"
@@ -824,27 +1093,32 @@
                 "tags": [
                     "TimeBlocks"
                 ],
-                "summary": "Deletar um bloqueio de tempo",
+                "summary": "Excluir um bloco de tempo",
                 "operationId": "4533505ce7dcf052c16d1d1352690b64",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID do bloco de tempo",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Bloqueio deletado com sucesso"
+                    "204": {
+                        "description": "Bloco de tempo excluído com sucesso"
+                    },
+                    "401": {
+                        "description": "Não autorizado"
                     },
                     "403": {
                         "description": "Acesso negado"
                     },
                     "404": {
-                        "description": "Bloqueio não encontrado"
+                        "description": "Bloco de tempo não encontrado"
                     }
                 },
                 "security": [
@@ -856,6 +1130,347 @@
         }
     },
     "components": {
+        "schemas": {
+            "Client": {
+                "title": "Client",
+                "description": "Client model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "example": "João Silva"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "joao@example.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+5511999999999",
+                        "nullable": true
+                    },
+                    "birth_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "1990-01-01",
+                        "nullable": true
+                    },
+                    "cpf_nif": {
+                        "type": "string",
+                        "example": "123.456.789-00",
+                        "nullable": true
+                    },
+                    "emergency_contact": {
+                        "type": "string",
+                        "example": "Maria Silva - (11) 99999-8888",
+                        "nullable": true
+                    },
+                    "case_summary": {
+                        "type": "string",
+                        "example": "Paciente em acompanhamento desde 2024, apresentando melhora progressiva.",
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "Active",
+                            "Inactive"
+                        ],
+                        "example": "Active"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Event": {
+                "title": "Event",
+                "description": "Event model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "client_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T14:00:00Z"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T15:00:00Z"
+                    },
+                    "duration_min": {
+                        "type": "integer",
+                        "example": 60
+                    },
+                    "focus_topic": {
+                        "type": "string",
+                        "example": "Ansiedade e estresse no trabalho",
+                        "nullable": true
+                    },
+                    "session_notes": {
+                        "type": "string",
+                        "example": "Paciente relatou melhora nos sintomas de ansiedade após as técnicas de respiração.",
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "In-person",
+                            "Online"
+                        ],
+                        "example": "In-person"
+                    },
+                    "payment_status": {
+                        "type": "string",
+                        "enum": [
+                            "Pending",
+                            "Paid"
+                        ],
+                        "example": "Pending"
+                    },
+                    "session_status": {
+                        "type": "string",
+                        "enum": [
+                            "Scheduled",
+                            "Completed",
+                            "Canceled"
+                        ],
+                        "example": "Scheduled"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "EventRequest": {
+                "title": "Event Request",
+                "description": "Request payload for creating/updating an event",
+                "required": [
+                    "client_id",
+                    "start_time",
+                    "duration_min",
+                    "type",
+                    "payment_status"
+                ],
+                "properties": {
+                    "client_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T14:00:00Z"
+                    },
+                    "duration_min": {
+                        "type": "integer",
+                        "maximum": 1440,
+                        "minimum": 1,
+                        "example": 60
+                    },
+                    "focus_topic": {
+                        "type": "string",
+                        "example": "Ansiedade e estresse no trabalho",
+                        "nullable": true
+                    },
+                    "session_notes": {
+                        "type": "string",
+                        "example": "Paciente relatou melhora nos sintomas de ansiedade após as técnicas de respiração.",
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "In-person",
+                            "Online"
+                        ],
+                        "example": "In-person"
+                    },
+                    "payment_status": {
+                        "type": "string",
+                        "enum": [
+                            "Pending",
+                            "Paid"
+                        ],
+                        "example": "Pending"
+                    },
+                    "session_status": {
+                        "type": "string",
+                        "enum": [
+                            "Scheduled",
+                            "Completed",
+                            "Canceled"
+                        ],
+                        "example": "Scheduled"
+                    }
+                },
+                "type": "object"
+            },
+            "TimeBlock": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Almoço"
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T12:00:00-03:00"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T13:00:00-03:00"
+                    },
+                    "color_hex": {
+                        "type": "string",
+                        "maxLength": 7,
+                        "example": "#FF5733",
+                        "nullable": true
+                    },
+                    "emoji": {
+                        "type": "string",
+                        "maxLength": 5,
+                        "example": "🍽️",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "item_type": {
+                        "type": "string",
+                        "example": "block"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "title": "User",
+                "description": "User model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "example": "Maria Silva"
+                    },
+                    "professional_title": {
+                        "type": "string",
+                        "example": "Dra.",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "maria@email.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+5511999999999",
+                        "nullable": true
+                    },
+                    "avatar_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://example.com/avatar.jpg",
+                        "nullable": true
+                    },
+                    "specialty": {
+                        "type": "string",
+                        "example": "Psicóloga Clínica",
+                        "nullable": true
+                    },
+                    "professional_license": {
+                        "type": "string",
+                        "example": "CRP 06/123456",
+                        "nullable": true
+                    },
+                    "cpf_nif": {
+                        "type": "string",
+                        "example": "123.456.789-00",
+                        "nullable": true
+                    },
+                    "office_address": {
+                        "type": "string",
+                        "example": "Rua Exemplo, 123 - São Paulo/SP",
+                        "nullable": true
+                    },
+                    "email_verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T12:00:00Z",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T12:00:00Z"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
             "sanctum": {
                 "type": "http",
@@ -874,8 +1489,12 @@
             "description": "Clients"
         },
         {
-            "name": "Events",
-            "description": "Events"
+            "name": "Sessions",
+            "description": "Sessions"
+        },
+        {
+            "name": "Calendar",
+            "description": "Calendar"
         },
         {
             "name": "TimeBlocks",

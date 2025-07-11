@@ -3,28 +3,42 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\TimeBlock;
+use App\Http\Resources\EventResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use OpenApi\Annotations as OA;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\EventRequest;
 use App\Http\Requests\CalendarItemsRequest;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
     /**
      * @OA\Get(
      *     path="/api/events",
-     *     summary="Listar todos os eventos do usuário autenticado",
-     *     tags={"Events"},
+     *     summary="Listar todas as sessões do usuário autenticado",
+     *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
-     *     @OA\Response(response=200, description="Lista de eventos")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de sessões",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/Event")
+     *         )
+     *     )
      * )
      */
     public function index()
     {
-        $events = Event::where('user_id', Auth::id())->get();
-        return response()->json($events);
+        $events = Event::where('user_id', Auth::id())
+            ->with(['client', 'user'])
+            ->orderBy('start_time', 'desc')
+            ->get();
+
+        return EventResource::collection($events);
     }
 
     /**
@@ -38,23 +52,18 @@ class EventController extends Controller
     /**
      * @OA\Post(
      *     path="/api/events",
-     *     summary="Criar novo evento",
-     *     tags={"Events"},
+     *     summary="Criar nova sessão",
+     *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"client_id","start_time","end_time","type","payment_status"},
-     *             @OA\Property(property="client_id", type="integer", example=1),
-     *             @OA\Property(property="title", type="string", example="Sessão de terapia"),
-     *             @OA\Property(property="start_time", type="string", format="date-time", example="2024-07-04T10:00:00"),
-     *             @OA\Property(property="end_time", type="string", format="date-time", example="2024-07-04T11:00:00"),
-     *             @OA\Property(property="notes", type="string", example="Paciente ansioso"),
-     *             @OA\Property(property="type", type="string", enum={"presencial","online"}, example="presencial"),
-     *             @OA\Property(property="payment_status", type="string", enum={"pago","pendente"}, example="pendente")
-     *         )
+     *         @OA\JsonContent(ref="#/components/schemas/EventRequest")
      *     ),
-     *     @OA\Response(response=201, description="Evento criado com sucesso"),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Sessão criada com sucesso",
+     *         @OA\JsonContent(ref="#/components/schemas/Event")
+     *     ),
      *     @OA\Response(response=409, description="Conflito de horário"),
      *     @OA\Response(response=422, description="Dados inválidos")
      * )
@@ -64,33 +73,47 @@ class EventController extends Controller
         $validated = $request->validated();
         $validated['user_id'] = Auth::id();
 
+        // Calcular end_time baseado em start_time + duration_min
+        $startTime = new \DateTime($validated['start_time']);
+        $endTime = (clone $startTime)->modify("+{$validated['duration_min']} minutes");
+
         // Lógica de conflito de horário
-        if ($this->hasTimeConflict($validated['start_time'], $validated['end_time'], Auth::id())) {
+        if ($this->hasTimeConflict($validated['start_time'], $endTime->format('Y-m-d H:i:s'), Auth::id())) {
             return response()->json([
                 'message' => 'Conflito de horário detectado. Este horário já está ocupado por outra sessão ou bloqueio.'
             ], 409);
         }
 
         $event = Event::create($validated);
-        return response()->json($event, 201);
+        return new EventResource($event->load(['client', 'user']));
     }
 
     /**
      * @OA\Get(
      *     path="/api/events/{id}",
-     *     summary="Exibir um evento específico",
-     *     tags={"Events"},
+     *     summary="Exibir uma sessão específica",
+     *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Dados do evento"),
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID da sessão",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dados da sessão",
+     *         @OA\JsonContent(ref="#/components/schemas/Event")
+     *     ),
      *     @OA\Response(response=403, description="Acesso negado"),
-     *     @OA\Response(response=404, description="Evento não encontrado")
+     *     @OA\Response(response=404, description="Sessão não encontrada")
      * )
      */
     public function show(Event $event)
     {
         $this->authorizeEvent($event);
-        return response()->json($event);
+        return new EventResource($event->load(['client', 'user']));
     }
 
     /**
@@ -104,27 +127,28 @@ class EventController extends Controller
     /**
      * @OA\Put(
      *     path="/api/events/{id}",
-     *     summary="Atualizar um evento",
-     *     tags={"Events"},
+     *     summary="Atualizar uma sessão",
+     *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID da sessão",
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(
-     *             required={"client_id","start_time","end_time","type","payment_status"},
-     *             @OA\Property(property="client_id", type="integer", example=1),
-     *             @OA\Property(property="title", type="string", example="Sessão de terapia"),
-     *             @OA\Property(property="start_time", type="string", format="date-time", example="2024-07-04T10:00:00"),
-     *             @OA\Property(property="end_time", type="string", format="date-time", example="2024-07-04T11:00:00"),
-     *             @OA\Property(property="notes", type="string", example="Paciente ansioso"),
-     *             @OA\Property(property="type", type="string", enum={"presencial","online"}, example="presencial"),
-     *             @OA\Property(property="payment_status", type="string", enum={"pago","pendente"}, example="pendente")
-     *         )
+     *         @OA\JsonContent(ref="#/components/schemas/EventRequest")
      *     ),
-     *     @OA\Response(response=200, description="Evento atualizado com sucesso"),
-     *     @OA\Response(response=409, description="Conflito de horário"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Sessão atualizada com sucesso",
+     *         @OA\JsonContent(ref="#/components/schemas/Event")
+     *     ),
      *     @OA\Response(response=403, description="Acesso negado"),
-     *     @OA\Response(response=404, description="Evento não encontrado"),
+     *     @OA\Response(response=404, description="Sessão não encontrada"),
+     *     @OA\Response(response=409, description="Conflito de horário"),
      *     @OA\Response(response=422, description="Dados inválidos")
      * )
      */
@@ -133,34 +157,50 @@ class EventController extends Controller
         $this->authorizeEvent($event);
         $validated = $request->validated();
 
+        // Calcular end_time baseado em start_time + duration_min
+        $startTime = new \DateTime($validated['start_time']);
+        $endTime = (clone $startTime)->modify("+{$validated['duration_min']} minutes");
+
         // Lógica de conflito de horário (ignora o próprio evento)
-        if ($this->hasTimeConflict($validated['start_time'], $validated['end_time'], Auth::id(), $event->id)) {
+        if ($this->hasTimeConflict($validated['start_time'], $endTime->format('Y-m-d H:i:s'), Auth::id(), $event->id)) {
             return response()->json([
                 'message' => 'Conflito de horário detectado. Este horário já está ocupado por outra sessão ou bloqueio.'
             ], 409);
         }
 
         $event->update($validated);
-        return response()->json($event);
+        return new EventResource($event->load(['client', 'user']));
     }
 
     /**
      * @OA\Delete(
      *     path="/api/events/{id}",
-     *     summary="Deletar um evento",
-     *     tags={"Events"},
+     *     summary="Excluir uma sessão",
+     *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Evento deletado com sucesso"),
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID da sessão",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Sessão excluída com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Sessão excluída com sucesso.")
+     *         )
+     *     ),
      *     @OA\Response(response=403, description="Acesso negado"),
-     *     @OA\Response(response=404, description="Evento não encontrado")
+     *     @OA\Response(response=404, description="Sessão não encontrada")
      * )
      */
     public function destroy(Event $event)
     {
         $this->authorizeEvent($event);
         $event->delete();
-        return response()->json(['message' => 'Evento deletado com sucesso.']);
+        return response()->json(['message' => 'Sessão excluída com sucesso.']);
     }
 
     // Função auxiliar para garantir que o evento pertence ao usuário autenticado
@@ -172,26 +212,42 @@ class EventController extends Controller
     }
 
     // Função auxiliar para verificar conflito de horário
+    /**
+     * Verifica se há conflito de horário para um determinado período
+     *
+     * @param string $start Data/hora de início
+     * @param string $end Data/hora de fim
+     * @param int $userId ID do usuário (terapeuta)
+     * @param int|null $ignoreEventId ID do evento a ser ignorado (para atualizações)
+     * @return bool
+     */
     private function hasTimeConflict($start, $end, $userId, $ignoreEventId = null)
     {
         // Verifica conflito com outros eventos
         $eventQuery = Event::where('user_id', $userId)
             ->where(function($q) use ($start, $end) {
+                // start_time entre o novo intervalo
                 $q->whereBetween('start_time', [$start, $end])
-                  ->orWhereBetween('end_time', [$start, $end])
+                  // fim do evento existente entre o novo intervalo
+                  ->orWhereRaw('(start_time + INTERVAL duration_min MINUTE) BETWEEN ? AND ?', [$start, $end])
+                  // evento existente envolve todo o novo intervalo
                   ->orWhere(function($q2) use ($start, $end) {
                       $q2->where('start_time', '<', $start)
-                         ->where('end_time', '>', $end);
+                         ->whereRaw('(start_time + INTERVAL duration_min MINUTE) > ?', [$end]);
                   });
             });
+
         if ($ignoreEventId) {
             $eventQuery->where('id', '!=', $ignoreEventId);
         }
+
         if ($eventQuery->exists()) {
             return true;
         }
+
         // Verifica conflito com time blocks
-        $blockQuery = \App\Models\TimeBlock::where('user_id', $userId)
+        $blockQuery = DB::table('time_blocks')
+            ->where('user_id', $userId)
             ->where(function($q) use ($start, $end) {
                 $q->whereBetween('start_time', [$start, $end])
                   ->orWhereBetween('end_time', [$start, $end])
@@ -200,18 +256,44 @@ class EventController extends Controller
                          ->where('end_time', '>', $end);
                   });
             });
+
         return $blockQuery->exists();
     }
 
     /**
      * @OA\Get(
      *     path="/api/calendar-items",
-     *     summary="Listar todos os itens do calendário (eventos e bloqueios) em um período",
-     *     tags={"Events"},
+     *     summary="Listar todos os itens do calendário (sessões e bloqueios) em um período",
+     *     tags={"Calendar"},
      *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="start", in="query", required=true, @OA\Schema(type="string", format="date")),
-     *     @OA\Parameter(name="end", in="query", required=true, @OA\Schema(type="string", format="date")),
-     *     @OA\Response(response=200, description="Lista de itens do calendário"),
+     *     @OA\Parameter(
+     *         name="start",
+     *         in="query",
+     *         required=true,
+     *         description="Data de início do período (YYYY-MM-DD)",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="end",
+     *         in="query",
+     *         required=true,
+     *         description="Data de término do período (YYYY-MM-DD)",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de itens do calendário",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 oneOf={
+     *                     @OA\Schema(ref="#/components/schemas/Event"),
+     *                     @OA\Schema(ref="#/components/schemas/TimeBlock")
+     *                 },
+     *                 @OA\Property(property="item_type", type="string", enum={"session", "block"})
+     *             )
+     *         )
+     *     ),
      *     @OA\Response(response=422, description="Dados inválidos")
      * )
      */
@@ -219,10 +301,12 @@ class EventController extends Controller
     {
         $validated = $request->validated();
         $userId = Auth::id();
-        $start = $validated['start'];
-        $end = $validated['end'];
+        $start = $validated['start'] . ' 00:00:00';
+        $end = $validated['end'] . ' 23:59:59';
 
-        $events = Event::where('user_id', $userId)
+        // Buscar sessões no período
+        $events = Event::with('client')
+            ->where('user_id', $userId)
             ->where(function($q) use ($start, $end) {
                 $q->whereBetween('start_time', [$start, $end])
                   ->orWhereBetween('end_time', [$start, $end])
@@ -237,7 +321,8 @@ class EventController extends Controller
                 return $event;
             });
 
-        $blocks = \App\Models\TimeBlock::where('user_id', $userId)
+        // Buscar bloqueios de tempo no período
+        $blocks = TimeBlock::where('user_id', $userId)
             ->where(function($q) use ($start, $end) {
                 $q->whereBetween('start_time', [$start, $end])
                   ->orWhereBetween('end_time', [$start, $end])
@@ -252,7 +337,9 @@ class EventController extends Controller
                 return $block;
             });
 
+        // Combinar e ordenar por data de início
         $items = $events->concat($blocks)->sortBy('start_time')->values();
+
         return response()->json($items);
     }
 }

@@ -23,9 +23,13 @@ class ClientRequest extends FormRequest
     {
         return [
             'full_name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:255',
-            'status' => 'nullable|string|in:active,inactive',
+            'email' => 'nullable|email|max:255|unique:clients,email,' . $this->client?->id,
+            'phone' => 'nullable|string|max:20',
+            'birth_date' => 'nullable|date',
+            'cpf_nif' => 'nullable|string|max:20',
+            'emergency_contact' => 'nullable|string',
+            'case_summary' => 'nullable|string',
+            'status' => 'nullable|string|in:Active,Inactive',
         ];
     }
 
@@ -39,8 +43,11 @@ class ClientRequest extends FormRequest
             'full_name.max' => 'O nome completo não pode ter mais de 255 caracteres.',
             'email.email' => 'O e-mail deve ser um endereço válido.',
             'email.max' => 'O e-mail não pode ter mais de 255 caracteres.',
-            'phone.max' => 'O telefone não pode ter mais de 255 caracteres.',
-            'status.in' => 'O status deve ser "active" ou "inactive".',
+            'email.unique' => 'Este e-mail já está em uso por outro cliente.',
+            'phone.max' => 'O telefone não pode ter mais de 20 caracteres.',
+            'birth_date.date' => 'A data de nascimento deve ser uma data válida.',
+            'cpf_nif.max' => 'O CPF/NIF não pode ter mais de 20 caracteres.',
+            'status.in' => 'O status deve ser "Active" ou "Inactive".',
         ];
     }
 }

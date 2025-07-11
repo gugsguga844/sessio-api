@@ -21,6 +21,7 @@ use Illuminate\Auth\Access\AuthorizationException;
  */
 
 use App\Models\Client;
+use App\Http\Resources\ClientResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ClientRequest;
@@ -39,7 +40,7 @@ class ClientController extends Controller
     public function index()
     {
         $clients = Client::where('user_id', Auth::id())->get();
-        return response()->json($clients);
+        return ClientResource::collection($clients);
     }
 
     /**
@@ -61,9 +62,13 @@ class ClientController extends Controller
      *         @OA\JsonContent(
      *             required={"full_name"},
      *             @OA\Property(property="full_name", type="string", example="João da Silva"),
-     *             @OA\Property(property="email", type="string", example="joao@email.com"),
+     *             @OA\Property(property="email", type="string", format="email", example="joao@email.com"),
      *             @OA\Property(property="phone", type="string", example="(11) 99999-9999"),
-     *             @OA\Property(property="status", type="string", enum={"active","inactive"}, example="active")
+     *             @OA\Property(property="birth_date", type="string", format="date", example="1990-01-01"),
+     *             @OA\Property(property="cpf_nif", type="string", example="123.456.789-00"),
+     *             @OA\Property(property="emergency_contact", type="string", example="Maria Silva - (11) 99999-8888"),
+     *             @OA\Property(property="case_summary", type="string", example="Paciente em acompanhamento desde 2024, apresentando melhora progressiva."),
+     *             @OA\Property(property="status", type="string", enum={"Active","Inactive"}, example="Active")
      *         )
      *     ),
      *     @OA\Response(response=201, description="Cliente criado com sucesso"),
@@ -75,7 +80,7 @@ class ClientController extends Controller
         $validated = $request->validated();
         $validated['user_id'] = Auth::id();
         $client = Client::create($validated);
-        return response()->json($client, 201);
+        return new ClientResource($client);
     }
 
     /**
@@ -93,7 +98,7 @@ class ClientController extends Controller
     public function show(Client $client)
     {
         $this->authorizeClient($client);
-        return response()->json($client);
+        return new ClientResource($client);
     }
 
     /**
@@ -130,9 +135,8 @@ class ClientController extends Controller
     public function update(ClientRequest $request, Client $client)
     {
         $this->authorizeClient($client);
-        $validated = $request->validated();
-        $client->update($validated);
-        return response()->json($client);
+        $client->update($request->validated());
+        return new ClientResource($client);
     }
 
     /**
@@ -151,7 +155,7 @@ class ClientController extends Controller
     {
         $this->authorizeClient($client);
         $client->delete();
-        return response()->json(['message' => 'Cliente deletado com sucesso.']);
+        return response()->json(['message' => 'Cliente deletado com sucesso']);
     }
 
     // Função auxiliar para garantir que o cliente pertence ao usuário autenticado
