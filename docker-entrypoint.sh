@@ -11,10 +11,6 @@ php artisan view:cache
 # Gerar documentação Swagger
 php artisan l5-swagger:generate
 
-# Aguardar mais tempo para o banco estar pronto
-echo "Aguardando banco de dados..."
-sleep 90
-
 # Tentar conectar ao banco várias vezes
 echo "Verificando conexão com banco de dados..."
 for i in {1..30}; do
