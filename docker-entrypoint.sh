@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Gerar chave da aplicação
+php artisan key:generate --force
+
+# Cache das configurações
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Gerar documentação Swagger
+php artisan l5-swagger:generate
+
 # Aguardar mais tempo para o banco estar pronto
 echo "Aguardando banco de dados..."
 sleep 90

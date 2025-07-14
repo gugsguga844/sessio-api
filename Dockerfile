@@ -33,9 +33,6 @@ RUN composer install --no-scripts --no-autoloader
 # Copiar o resto dos arquivos
 COPY . .
 
-# Criar arquivo .env se não existir
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
-
 # Gerar autoloader
 RUN composer dump-autoload --optimize
 
@@ -46,17 +43,6 @@ RUN npm install
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/storage \
     && chmod -R 755 /var/www/bootstrap/cache
-
-# Gerar chave da aplicação
-RUN php artisan key:generate --force
-
-# Cache das configurações
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
-
-# Gerar documentação Swagger
-RUN php artisan l5-swagger:generate
 
 # Expor porta
 EXPOSE 8000
