@@ -22,7 +22,9 @@ class EventRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'client_id' => 'required|exists:clients,id',
+            'client_id' => 'sometimes|exists:clients,id', // compatibilidade
+            'client_ids' => 'sometimes|array',
+            'client_ids.*' => 'exists:clients,id',
             'start_time' => 'required|date',
             'duration_min' => 'required|integer|min:1|max:1440', // Máximo 24 horas em minutos
             'focus_topic' => 'nullable|string|max:500',

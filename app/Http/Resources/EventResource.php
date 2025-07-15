@@ -51,8 +51,14 @@ class EventResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'client_id' => $this->client_id,
             'user_id' => $this->user_id,
+            'participants' => $this->participants ? $this->participants->map(function($c) {
+                return [
+                    'id' => $c->id,
+                    'full_name' => $c->full_name,
+                    'email' => $c->email,
+                ];
+            }) : [],
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
             'duration_min' => $this->duration_min,

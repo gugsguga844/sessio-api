@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use OpenApi\Annotations as OA;
+use App\Models\UserPreference;
 
 class AuthController extends Controller
 {
@@ -244,6 +245,85 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Usuário atualizado com sucesso!',
             'user' => new UserResource($user),
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/me/preferences",
+     *     summary="Obter preferências do usuário autenticado",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Preferências do usuário",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="preferences", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Não autenticado")
+     * )
+     */
+    public function getPreferences(Request $request)
+    {
+        $user = $request->user();
+        $prefs = $user->preference;
+        if (!$prefs) {
+            $prefs = UserPreference::create(['user_id' => $user->id]);
+        }
+        return response()->json(['preferences' => $prefs]);
+    }
+
+    /**
+     * @OA\Patch(
+     *     path="/api/me/preferences",
+     *     summary="Atualizar preferências do usuário autenticado",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="client_terminology", type="string", example="Cliente"),
+     *             @OA\Property(property="default_calendar_view", type="string", example="Weekly"),
+     *             @OA\Property(property="visible_calendar_days", type="integer", example=5),
+     *             @OA\Property(property="show_canceled_sessions", type="boolean", example=false),
+     *             @OA\Property(property="interface_theme", type="string", example="Light"),
+     *             @OA\Property(property="language", type="string", example="pt-BR")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Preferências atualizadas",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="preferences", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Não autenticado"),
+     *     @OA\Response(response=422, description="Dados inválidos")
+     * )
+     */
+    public function updatePreferences(Request $request)
+    {
+        $user = $request->user();
+        $prefs = $user->preference;
+        if (!$prefs) {
+            $prefs = UserPreference::create(['user_id' => $user->id]);
+        }
+        $validated = $request->validate([
+            'client_terminology' => 'sometimes|string|in:Cliente,Paciente',
+            'default_calendar_view' => 'sometimes|string|in:Weekly,Daily,Monthly',
+            'visible_calendar_days' => 'sometimes|integer|min:1|max:7',
+            'show_canceled_sessions' => 'sometimes|boolean',
+            'interface_theme' => 'sometimes|string|in:Light,Dark',
+            'language' => 'sometimes|string|max:10',
+        ]);
+        $prefs->fill($validated);
+        $prefs->updated_at = now();
+        $prefs->save();
+        return response()->json([
+            'message' => 'Preferências atualizadas com sucesso!',
+            'preferences' => $prefs,
         ]);
     }
 }

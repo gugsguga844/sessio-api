@@ -53,12 +53,9 @@ class Event extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the client that owns the event.
-     */
-    public function client(): BelongsTo
+    public function participants()
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsToMany(Client::class, 'event_participants', 'event_id', 'client_id');
     }
 
     /**

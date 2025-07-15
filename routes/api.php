@@ -29,6 +29,11 @@ Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logo
 Route::middleware('auth:sanctum')->get('/me', [AuthController::class, 'me']);
 Route::middleware('auth:sanctum')->patch('/me', [App\Http\Controllers\AuthController::class, 'update']);
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me/preferences', [\App\Http\Controllers\AuthController::class, 'getPreferences']);
+    Route::patch('/me/preferences', [\App\Http\Controllers\AuthController::class, 'updatePreferences']);
+});
+
 Route::middleware('auth:sanctum')->apiResource('clients', ClientController::class);
 Route::middleware('auth:sanctum')->apiResource('events', EventController::class);
 Route::middleware('auth:sanctum')->apiResource('time-blocks', TimeBlockController::class);

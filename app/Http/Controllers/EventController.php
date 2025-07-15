@@ -12,6 +12,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\EventRequest;
 use App\Http\Requests\CalendarItemsRequest;
 use Illuminate\Support\Facades\DB;
+use App\Models\EventParticipant;
 
 class EventController extends Controller
 {
@@ -84,8 +85,21 @@ class EventController extends Controller
             ], 409);
         }
 
+        // Criação do evento
         $event = Event::create($validated);
-        return new EventResource($event->load(['client', 'user']));
+
+        // Participantes: múltiplos ou único
+        $clientIds = [];
+        if (isset($validated['client_ids'])) {
+            $clientIds = $validated['client_ids'];
+        } elseif (isset($validated['client_id'])) {
+            $clientIds = [$validated['client_id']];
+        }
+        if ($clientIds) {
+            $event->participants()->sync($clientIds);
+        }
+
+        return new EventResource($event->load(['participants', 'user']));
     }
 
     /**
@@ -169,7 +183,19 @@ class EventController extends Controller
         }
 
         $event->update($validated);
-        return new EventResource($event->load(['client', 'user']));
+
+        // Participantes: múltiplos ou único
+        $clientIds = [];
+        if (isset($validated['client_ids'])) {
+            $clientIds = $validated['client_ids'];
+        } elseif (isset($validated['client_id'])) {
+            $clientIds = [$validated['client_id']];
+        }
+        if ($clientIds) {
+            $event->participants()->sync($clientIds);
+        }
+
+        return new EventResource($event->load(['participants', 'user']));
     }
 
     /**
@@ -305,7 +331,7 @@ class EventController extends Controller
         $end = $validated['end'] . ' 23:59:59';
 
         // Buscar sessões no período
-        $events = Event::with('client')
+        $events = Event::with('participants')
             ->where('user_id', $userId)
             ->where(function($q) use ($start, $end) {
                 $q->whereBetween('start_time', [$start, $end])
@@ -317,8 +343,9 @@ class EventController extends Controller
             })
             ->get()
             ->map(function($event) {
-                $event->item_type = 'session';
-                return $event;
+                $eventArray = $event->toArray();
+                $eventArray['item_type'] = 'session';
+                return $eventArray;
             });
 
         // Buscar bloqueios de tempo no período

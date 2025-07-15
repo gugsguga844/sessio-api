@@ -42,4 +42,9 @@ class Client extends Model
     {
         return $this->hasMany(Event::class);
     }
+
+    public function groupEvents()
+    {
+        return $this->belongsToMany(Event::class, 'event_participants', 'client_id', 'event_id');
+    }
 }

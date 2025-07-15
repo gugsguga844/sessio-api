@@ -264,6 +264,200 @@
                         "bearerAuth": []
                     }
                 ]
+            },
+            "patch": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Atualizar dados do usuário autenticado",
+                "operationId": "02391d619bc40c1534ee06cf0cc10764",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "Maria Silva"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "maria@email.com"
+                                    },
+                                    "professional_title": {
+                                        "type": "string",
+                                        "example": "Dra."
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+5511999999999"
+                                    },
+                                    "specialty": {
+                                        "type": "string",
+                                        "example": "Psicóloga Clínica"
+                                    },
+                                    "professional_license": {
+                                        "type": "string",
+                                        "example": "CRP 06/123456"
+                                    },
+                                    "cpf_nif": {
+                                        "type": "string",
+                                        "example": "123.456.789-00"
+                                    },
+                                    "office_address": {
+                                        "type": "string",
+                                        "example": "Rua Exemplo, 123 - São Paulo/SP"
+                                    },
+                                    "image_url": {
+                                        "type": "string",
+                                        "example": "https://sessio-files.s3.us-east-2.amazonaws.com/images/foto.png"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuário atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/me/preferences": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Obter preferências do usuário autenticado",
+                "operationId": "5098ab23c2e0ae1e0c5b51f50f30b737",
+                "responses": {
+                    "200": {
+                        "description": "Preferências do usuário",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "preferences": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Atualizar preferências do usuário autenticado",
+                "operationId": "8f98c8b2334fe1efe3ba0d18644500c0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "client_terminology": {
+                                        "type": "string",
+                                        "example": "Cliente"
+                                    },
+                                    "default_calendar_view": {
+                                        "type": "string",
+                                        "example": "Weekly"
+                                    },
+                                    "visible_calendar_days": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "show_canceled_sessions": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "interface_theme": {
+                                        "type": "string",
+                                        "example": "Light"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "example": "pt-BR"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Preferências atualizadas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "preferences": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/clients": {
