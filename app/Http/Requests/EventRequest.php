@@ -32,6 +32,7 @@ class EventRequest extends FormRequest
             'type' => 'required|string|in:' . \App\Models\Event::TYPE_IN_PERSON . ',' . \App\Models\Event::TYPE_ONLINE,
             'payment_status' => 'required|string|in:' . \App\Models\Event::PAYMENT_PAID . ',' . \App\Models\Event::PAYMENT_PENDING,
             'session_status' => 'sometimes|string|in:' . \App\Models\Event::STATUS_SCHEDULED . ',' . \App\Models\Event::STATUS_COMPLETED . ',' . \App\Models\Event::STATUS_CANCELED,
+            'meeting_url' => 'sometimes|nullable|url|max:255',
         ];
     }
 

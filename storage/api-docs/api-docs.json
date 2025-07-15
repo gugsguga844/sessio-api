@@ -723,7 +723,7 @@
                 "tags": [
                     "Sessions"
                 ],
-                "summary": "Criar nova sessão",
+                "summary": "Criar nova sessão (individual ou em grupo)",
                 "operationId": "508895e03d7f10edac84357084c87b20",
                 "requestBody": {
                     "required": true,
@@ -806,7 +806,7 @@
                 "tags": [
                     "Sessions"
                 ],
-                "summary": "Atualizar uma sessão",
+                "summary": "Atualizar uma sessão (individual ou em grupo)",
                 "operationId": "fb130dcf1ab4d7abbd3a173741df1f8f",
                 "parameters": [
                     {
@@ -1401,13 +1401,29 @@
                         "type": "integer",
                         "example": 1
                     },
-                    "client_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
                     "user_id": {
                         "type": "integer",
                         "example": 1
+                    },
+                    "participants": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "full_name": {
+                                    "type": "string",
+                                    "example": "João da Silva"
+                                },
+                                "email": {
+                                    "type": "string",
+                                    "example": "joao@email.com"
+                                }
+                            },
+                            "type": "object"
+                        }
                     },
                     "start_time": {
                         "type": "string",
@@ -1474,18 +1490,7 @@
             "EventRequest": {
                 "title": "Event Request",
                 "description": "Request payload for creating/updating an event",
-                "required": [
-                    "client_id",
-                    "start_time",
-                    "duration_min",
-                    "type",
-                    "payment_status"
-                ],
                 "properties": {
-                    "client_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
                     "start_time": {
                         "type": "string",
                         "format": "date-time",
@@ -1533,7 +1538,48 @@
                         "example": "Scheduled"
                     }
                 },
-                "type": "object"
+                "type": "object",
+                "oneOf": [
+                    {
+                        "required": [
+                            "client_id",
+                            "start_time",
+                            "duration_min",
+                            "type",
+                            "payment_status"
+                        ],
+                        "properties": {
+                            "client_id": {
+                                "type": "integer",
+                                "example": 1
+                            }
+                        },
+                        "type": "object"
+                    },
+                    {
+                        "required": [
+                            "client_ids",
+                            "start_time",
+                            "duration_min",
+                            "type",
+                            "payment_status"
+                        ],
+                        "properties": {
+                            "client_ids": {
+                                "type": "array",
+                                "items": {
+                                    "type": "integer"
+                                },
+                                "example": [
+                                    1,
+                                    2,
+                                    3
+                                ]
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
             },
             "TimeBlock": {
                 "properties": {

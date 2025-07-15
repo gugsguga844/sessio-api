@@ -31,6 +31,7 @@ class Event extends Model
         'focus_topic',
         'session_notes',
         'type',
+        'meeting_url',
         'payment_status',
         'session_status',
     ];
@@ -43,6 +44,7 @@ class Event extends Model
     protected $attributes = [
         'payment_status' => self::PAYMENT_PENDING,
         'session_status' => self::STATUS_SCHEDULED,
+        'meeting_url' => null,
     ];
 
     /**

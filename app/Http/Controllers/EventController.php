@@ -53,7 +53,7 @@ class EventController extends Controller
     /**
      * @OA\Post(
      *     path="/api/events",
-     *     summary="Criar nova sessão",
+     *     summary="Criar nova sessão (individual ou em grupo)",
      *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
      *     @OA\RequestBody(
@@ -68,6 +68,10 @@ class EventController extends Controller
      *     @OA\Response(response=409, description="Conflito de horário"),
      *     @OA\Response(response=422, description="Dados inválidos")
      * )
+     *
+     * O payload pode conter:
+     * - client_id: para sessão individual
+     * - client_ids: array de IDs para sessão em grupo
      */
     public function store(EventRequest $request)
     {
@@ -141,7 +145,7 @@ class EventController extends Controller
     /**
      * @OA\Put(
      *     path="/api/events/{id}",
-     *     summary="Atualizar uma sessão",
+     *     summary="Atualizar uma sessão (individual ou em grupo)",
      *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
@@ -165,6 +169,10 @@ class EventController extends Controller
      *     @OA\Response(response=409, description="Conflito de horário"),
      *     @OA\Response(response=422, description="Dados inválidos")
      * )
+     *
+     * O payload pode conter:
+     * - client_id: para sessão individual
+     * - client_ids: array de IDs para sessão em grupo
      */
     public function update(EventRequest $request, Event $event)
     {
