@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\Event;
+use App\Models\Session;
 use App\Models\User;
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class EventFactory extends Factory
+class SessionFactory extends Factory
 {
-    protected $model = Event::class;
+    protected $model = \App\Models\Session::class;
 
     public function definition(): array
     {

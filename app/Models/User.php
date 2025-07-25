@@ -10,6 +10,25 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @OA\Schema(
+ *     schema="UserModel",
+ *     title="User",
+ *     description="Modelo de Usuário",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="full_name", type="string", example="Maria Silva"),
+ *     @OA\Property(property="professional_title", type="string", example="Psicóloga"),
+ *     @OA\Property(property="email", type="string", example="maria@email.com"),
+ *     @OA\Property(property="phone", type="string", example="(11) 99999-9999"),
+ *     @OA\Property(property="avatar_url", type="string", example="https://s3.amazonaws.com/bucket/avatar.png"),
+ *     @OA\Property(property="specialty", type="string", example="Terapia Cognitivo-Comportamental"),
+ *     @OA\Property(property="professional_license", type="string", example="CRP 12345/6"),
+ *     @OA\Property(property="cpf_nif", type="string", example="123.456.789-00"),
+ *     @OA\Property(property="office_address", type="string", example="Rua Exemplo, 123"),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time")
+ * )
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;

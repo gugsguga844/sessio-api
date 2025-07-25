@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class EventRequest extends FormRequest
+class SessionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -29,10 +29,12 @@ class EventRequest extends FormRequest
             'duration_min' => 'required|integer|min:1|max:1440', // Máximo 24 horas em minutos
             'focus_topic' => 'nullable|string|max:500',
             'session_notes' => 'nullable|string',
-            'type' => 'required|string|in:' . \App\Models\Event::TYPE_IN_PERSON . ',' . \App\Models\Event::TYPE_ONLINE,
-            'payment_status' => 'required|string|in:' . \App\Models\Event::PAYMENT_PAID . ',' . \App\Models\Event::PAYMENT_PENDING,
-            'session_status' => 'sometimes|string|in:' . \App\Models\Event::STATUS_SCHEDULED . ',' . \App\Models\Event::STATUS_COMPLETED . ',' . \App\Models\Event::STATUS_CANCELED,
+            'type' => 'required|string|in:' . \App\Models\Session::TYPE_IN_PERSON . ',' . \App\Models\Session::TYPE_ONLINE,
+            'payment_status' => 'required|string|in:' . \App\Models\Session::PAYMENT_PAID . ',' . \App\Models\Session::PAYMENT_PENDING,
+            'payment_method' => 'sometimes|nullable|string|max:50',
+            'session_status' => 'sometimes|string|in:' . \App\Models\Session::STATUS_SCHEDULED . ',' . \App\Models\Session::STATUS_COMPLETED . ',' . \App\Models\Session::STATUS_CANCELED,
             'meeting_url' => 'sometimes|nullable|url|max:255',
+            'price' => 'sometimes|nullable|numeric|min:0',
         ];
     }
 
@@ -52,10 +54,10 @@ class EventRequest extends FormRequest
             'duration_min.max' => 'A duração máxima da sessão é de 1440 minutos (24 horas).',
             'focus_topic.max' => 'O tópico de foco não pode ter mais de 500 caracteres.',
             'type.required' => 'O tipo de sessão é obrigatório.',
-            'type.in' => 'O tipo de sessão deve ser "' . \App\Models\Event::TYPE_IN_PERSON . '" ou "' . \App\Models\Event::TYPE_ONLINE . '".',
+            'type.in' => 'O tipo de sessão deve ser "' . \App\Models\Session::TYPE_IN_PERSON . '" ou "' . \App\Models\Session::TYPE_ONLINE . '".',
             'payment_status.required' => 'O status do pagamento é obrigatório.',
-            'payment_status.in' => 'O status do pagamento deve ser "' . \App\Models\Event::PAYMENT_PAID . '" ou "' . \App\Models\Event::PAYMENT_PENDING . '".',
-            'session_status.in' => 'O status da sessão deve ser "' . \App\Models\Event::STATUS_SCHEDULED . '", "' . \App\Models\Event::STATUS_COMPLETED . '" ou "' . \App\Models\Event::STATUS_CANCELED . '".',
+            'payment_status.in' => 'O status do pagamento deve ser "' . \App\Models\Session::PAYMENT_PAID . '" ou "' . \App\Models\Session::PAYMENT_PENDING . '".',
+            'session_status.in' => 'O status da sessão deve ser "' . \App\Models\Session::STATUS_SCHEDULED . '", "' . \App\Models\Session::STATUS_COMPLETED . '" ou "' . \App\Models\Session::STATUS_CANCELED . '".',
         ];
     }
 }

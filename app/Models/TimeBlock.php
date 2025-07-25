@@ -7,6 +7,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
+/**
+ * @OA\Schema(
+ *     schema="TimeBlockModel",
+ *     title="TimeBlock",
+ *     description="Modelo de Bloco de Tempo",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="user_id", type="integer", example=1),
+ *     @OA\Property(property="title", type="string", example="Almoço"),
+ *     @OA\Property(property="start_time", type="string", format="date-time", example="2025-07-08T12:00:00Z"),
+ *     @OA\Property(property="end_time", type="string", format="date-time", example="2025-07-08T13:00:00Z"),
+ *     @OA\Property(property="color_hex", type="string", example="#FF0000"),
+ *     @OA\Property(property="emoji", type="string", example="🍔"),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time")
+ * )
+ */
 class TimeBlock extends Model
 {
     use HasFactory;

@@ -691,293 +691,6 @@
                 ]
             }
         },
-        "/api/sessions": {
-            "get": {
-                "tags": [
-                    "Sessions"
-                ],
-                "summary": "Listar todas as sessões do usuário autenticado",
-                "operationId": "4f67b9ceecd28427b18e631bf3fdc1db",
-                "responses": {
-                    "200": {
-                        "description": "Lista de sessões",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Event"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Sessions"
-                ],
-                "summary": "Criar nova sessão (individual ou em grupo)",
-                "operationId": "659fe1f5c960279f2c1ff4c98a64001a",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/EventRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Sessão criada com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Event"
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Conflito de horário"
-                    },
-                    "422": {
-                        "description": "Dados inválidos"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/sessions/{id}": {
-            "get": {
-                "tags": [
-                    "Sessions"
-                ],
-                "summary": "Exibir uma sessão específica",
-                "operationId": "50fec02dc902510dd1a9f29993a9901a",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID da sessão",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Dados da sessão",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Event"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Acesso negado"
-                    },
-                    "404": {
-                        "description": "Sessão não encontrada"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Sessions"
-                ],
-                "summary": "Atualizar uma sessão (individual ou em grupo)",
-                "operationId": "3a7c453082a54c837f0ff42ba5b6bc75",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID da sessão",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/EventRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Sessão atualizada com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Event"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Acesso negado"
-                    },
-                    "404": {
-                        "description": "Sessão não encontrada"
-                    },
-                    "409": {
-                        "description": "Conflito de horário"
-                    },
-                    "422": {
-                        "description": "Dados inválidos"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Sessions"
-                ],
-                "summary": "Excluir uma sessão",
-                "operationId": "19c69ef4ff4a573655e5ace75068fdbd",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID da sessão",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Sessão excluída com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sessão excluída com sucesso."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Acesso negado"
-                    },
-                    "404": {
-                        "description": "Sessão não encontrada"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/calendar-items": {
-            "get": {
-                "tags": [
-                    "Calendar"
-                ],
-                "summary": "Listar todos os itens do calendário (sessões e bloqueios) em um período",
-                "operationId": "fadf19ba42f735ddf6195f0ec7612b78",
-                "parameters": [
-                    {
-                        "name": "start",
-                        "in": "query",
-                        "description": "Data de início do período (YYYY-MM-DD)",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "end",
-                        "in": "query",
-                        "description": "Data de término do período (YYYY-MM-DD)",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Lista de itens do calendário",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "item_type": {
-                                                "type": "string",
-                                                "enum": [
-                                                    "session",
-                                                    "block"
-                                                ]
-                                            }
-                                        },
-                                        "type": "object",
-                                        "oneOf": [
-                                            {
-                                                "$ref": "#/components/schemas/Event"
-                                            },
-                                            {
-                                                "$ref": "#/components/schemas/TimeBlock"
-                                            }
-                                        ]
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Dados inválidos"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
         "/upload-image": {
             "post": {
                 "tags": [
@@ -1034,6 +747,293 @@
                 "security": [
                     {
                         "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sessions": {
+            "get": {
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Listar todas as sessões do usuário autenticado",
+                "operationId": "b21c2621be2d03062ca5e8d9ac2cbb34",
+                "responses": {
+                    "200": {
+                        "description": "Lista de sessões",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Session"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Criar nova sessão (individual ou em grupo)",
+                "operationId": "8a6e7c46885a454b4a77edc4c0735fe0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SessionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Sessão criada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Session"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflito de horário"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/sessions/{id}": {
+            "get": {
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Exibir uma sessão específica",
+                "operationId": "016ccb329536af11a285038c8047203e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da sessão",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dados da sessão",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Session"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acesso negado"
+                    },
+                    "404": {
+                        "description": "Sessão não encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Atualizar uma sessão (individual ou em grupo)",
+                "operationId": "250ccd37acabd47f420f5c8466693e73",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da sessão",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SessionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sessão atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Session"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acesso negado"
+                    },
+                    "404": {
+                        "description": "Sessão não encontrada"
+                    },
+                    "409": {
+                        "description": "Conflito de horário"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Excluir uma sessão",
+                "operationId": "db94cc473d7d9281ede13d2fabd2787f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID da sessão",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sessão excluída com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sessão excluída com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acesso negado"
+                    },
+                    "404": {
+                        "description": "Sessão não encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/calendar-items": {
+            "get": {
+                "tags": [
+                    "Calendar"
+                ],
+                "summary": "Listar todos os itens do calendário (sessões e bloqueios) em um período",
+                "operationId": "77c5a5e94b04eeb057312b0893275c9e",
+                "parameters": [
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "description": "Data de início do período (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end",
+                        "in": "query",
+                        "description": "Data de término do período (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de itens do calendário",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "item_type": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "session",
+                                                    "block"
+                                                ]
+                                            }
+                                        },
+                                        "type": "object",
+                                        "oneOf": [
+                                            {
+                                                "$ref": "#/components/schemas/Session"
+                                            },
+                                            {
+                                                "$ref": "#/components/schemas/TimeBlock"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
                     }
                 ]
             }
@@ -1393,9 +1393,9 @@
                 },
                 "type": "object"
             },
-            "Event": {
-                "title": "Event",
-                "description": "Event model",
+            "Session": {
+                "title": "Session",
+                "description": "Session model",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -1471,6 +1471,11 @@
                         ],
                         "example": "Pending"
                     },
+                    "payment_method": {
+                        "type": "string",
+                        "example": "Pix",
+                        "nullable": true
+                    },
                     "session_status": {
                         "type": "string",
                         "enum": [
@@ -1479,6 +1484,12 @@
                             "Canceled"
                         ],
                         "example": "Scheduled"
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 250,
+                        "nullable": true
                     },
                     "created_at": {
                         "type": "string",
@@ -1493,82 +1504,18 @@
                 },
                 "type": "object"
             },
-            "EventRequest": {
-                "title": "Event Request",
-                "description": "Request payload for creating/updating an event",
-                "properties": {
-                    "start_time": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2025-07-08T14:00:00Z"
-                    },
-                    "duration_min": {
-                        "type": "integer",
-                        "maximum": 1440,
-                        "minimum": 1,
-                        "example": 60
-                    },
-                    "focus_topic": {
-                        "type": "string",
-                        "example": "Ansiedade e estresse no trabalho",
-                        "nullable": true
-                    },
-                    "session_notes": {
-                        "type": "string",
-                        "example": "Paciente relatou melhora nos sintomas de ansiedade após as técnicas de respiração.",
-                        "nullable": true
-                    },
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "In-person",
-                            "Online"
-                        ],
-                        "example": "In-person"
-                    },
-                    "payment_status": {
-                        "type": "string",
-                        "enum": [
-                            "Pending",
-                            "Paid"
-                        ],
-                        "example": "Pending"
-                    },
-                    "session_status": {
-                        "type": "string",
-                        "enum": [
-                            "Scheduled",
-                            "Completed",
-                            "Canceled"
-                        ],
-                        "example": "Scheduled"
-                    }
-                },
-                "type": "object",
+            "SessionRequest": {
+                "title": "Session Request",
+                "description": "Request payload for creating/updating a session",
                 "oneOf": [
-                    {
-                        "required": [
-                            "client_id",
-                            "start_time",
-                            "duration_min",
-                            "type",
-                            "payment_status"
-                        ],
-                        "properties": {
-                            "client_id": {
-                                "type": "integer",
-                                "example": 1
-                            }
-                        },
-                        "type": "object"
-                    },
                     {
                         "required": [
                             "client_ids",
                             "start_time",
                             "duration_min",
                             "type",
-                            "payment_status"
+                            "payment_status",
+                            "session_status"
                         ],
                         "properties": {
                             "client_ids": {
@@ -1581,6 +1528,67 @@
                                     2,
                                     3
                                 ]
+                            },
+                            "start_time": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-07-08T14:00:00Z"
+                            },
+                            "duration_min": {
+                                "type": "integer",
+                                "example": 60
+                            },
+                            "focus_topic": {
+                                "type": "string",
+                                "example": "Ansiedade e estresse no trabalho",
+                                "nullable": true
+                            },
+                            "session_notes": {
+                                "type": "string",
+                                "example": "Paciente relatou melhora nos sintomas de ansiedade após as técnicas de respiração.",
+                                "nullable": true
+                            },
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "In-person",
+                                    "Online"
+                                ],
+                                "example": "Online"
+                            },
+                            "meeting_url": {
+                                "type": "string",
+                                "format": "uri",
+                                "example": "https://meet.google.com/abc-defg-hij",
+                                "nullable": true
+                            },
+                            "payment_status": {
+                                "type": "string",
+                                "enum": [
+                                    "Pending",
+                                    "Paid"
+                                ],
+                                "example": "Paid"
+                            },
+                            "payment_method": {
+                                "type": "string",
+                                "example": "Cartão de Crédito",
+                                "nullable": true
+                            },
+                            "price": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 350,
+                                "nullable": true
+                            },
+                            "session_status": {
+                                "type": "string",
+                                "enum": [
+                                    "Scheduled",
+                                    "Completed",
+                                    "Canceled"
+                                ],
+                                "example": "Completed"
                             }
                         },
                         "type": "object"
@@ -1712,6 +1720,217 @@
                         "type": "string",
                         "format": "date-time",
                         "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ClientModel": {
+                "title": "Client",
+                "description": "Modelo de Cliente",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "example": "Maria Silva"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "maria@email.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "(11) 99999-9999"
+                    },
+                    "birth_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "1990-01-01"
+                    },
+                    "cpf_nif": {
+                        "type": "string",
+                        "example": "123.456.789-00"
+                    },
+                    "emergency_contact": {
+                        "type": "string",
+                        "example": "João - (11) 98888-8888"
+                    },
+                    "case_summary": {
+                        "type": "string",
+                        "example": "Paciente com histórico de ansiedade."
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "Ativo"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "SessionParticipantModel": {
+                "title": "SessionParticipant",
+                "description": "Participante de Sessão (pivot de sessão em grupo)",
+                "properties": {
+                    "session_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "client_id": {
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "TimeBlockModel": {
+                "title": "TimeBlock",
+                "description": "Modelo de Bloco de Tempo",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Almoço"
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T12:00:00Z"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T13:00:00Z"
+                    },
+                    "color_hex": {
+                        "type": "string",
+                        "example": "#FF0000"
+                    },
+                    "emoji": {
+                        "type": "string",
+                        "example": "🍔"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "UserModel": {
+                "title": "User",
+                "description": "Modelo de Usuário",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "example": "Maria Silva"
+                    },
+                    "professional_title": {
+                        "type": "string",
+                        "example": "Psicóloga"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "maria@email.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "(11) 99999-9999"
+                    },
+                    "avatar_url": {
+                        "type": "string",
+                        "example": "https://s3.amazonaws.com/bucket/avatar.png"
+                    },
+                    "specialty": {
+                        "type": "string",
+                        "example": "Terapia Cognitivo-Comportamental"
+                    },
+                    "professional_license": {
+                        "type": "string",
+                        "example": "CRP 12345/6"
+                    },
+                    "cpf_nif": {
+                        "type": "string",
+                        "example": "123.456.789-00"
+                    },
+                    "office_address": {
+                        "type": "string",
+                        "example": "Rua Exemplo, 123"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "UserPreferenceModel": {
+                "title": "UserPreference",
+                "description": "Preferências do Usuário",
+                "properties": {
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "client_terminology": {
+                        "type": "string",
+                        "example": "Cliente"
+                    },
+                    "default_calendar_view": {
+                        "type": "string",
+                        "example": "Weekly"
+                    },
+                    "visible_calendar_days": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "show_canceled_sessions": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "interface_theme": {
+                        "type": "string",
+                        "example": "Light"
+                    },
+                    "language": {
+                        "type": "string",
+                        "example": "pt-BR"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-07-08T12:00:00Z"
                     }
                 },
                 "type": "object"

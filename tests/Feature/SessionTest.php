@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\Event;
+use App\Models\Session;
 use App\Models\User;
 use App\Models\Client;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class EventTest extends TestCase
+class SessionTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -19,7 +19,7 @@ class EventTest extends TestCase
         return [$user, $token];
     }
 
-    public function test_create_event()
+    public function test_create_session()
     {
         [$user, $token] = $this->authUser();
         $client = Client::factory()->create(['user_id' => $user->id]);
@@ -32,48 +32,48 @@ class EventTest extends TestCase
             'payment_status' => 'pendente',
         ];
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/events', $payload);
+            ->postJson('/api/sessions', $payload);
         $response->assertStatus(201)
             ->assertJsonFragment(['title' => 'Sessão Teste']);
     }
 
-    public function test_list_events_only_user()
+    public function test_list_sessions_only_user()
     {
         [$user, $token] = $this->authUser();
         $client = Client::factory()->create(['user_id' => $user->id]);
-        Event::factory()->count(2)->create(['user_id' => $user->id, 'client_id' => $client->id]);
-        Event::factory()->count(2)->create(); // outros usuários
+        Session::factory()->count(2)->create(['user_id' => $user->id, 'client_id' => $client->id]);
+        Session::factory()->count(2)->create(); // outros usuários
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->getJson('/api/events');
+            ->getJson('/api/sessions');
         $response->assertStatus(200)
             ->assertJsonCount(2);
     }
 
-    public function test_show_event_authorized()
+    public function test_show_session_authorized()
     {
         [$user, $token] = $this->authUser();
         $client = Client::factory()->create(['user_id' => $user->id]);
-        $event = Event::factory()->create(['user_id' => $user->id, 'client_id' => $client->id]);
+        $session = Session::factory()->create(['user_id' => $user->id, 'client_id' => $client->id]);
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->getJson('/api/events/' . $event->id);
+            ->getJson('/api/sessions/' . $session->id);
         $response->assertStatus(200)
-            ->assertJsonFragment(['id' => $event->id]);
+            ->assertJsonFragment(['id' => $session->id]);
     }
 
-    public function test_show_event_unauthorized()
+    public function test_show_session_unauthorized()
     {
         [$user, $token] = $this->authUser();
-        $event = Event::factory()->create();
+        $session = Session::factory()->create();
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->getJson('/api/events/' . $event->id);
+            ->getJson('/api/sessions/' . $session->id);
         $response->assertStatus(403);
     }
 
-    public function test_update_event()
+    public function test_update_session()
     {
         [$user, $token] = $this->authUser();
         $client = Client::factory()->create(['user_id' => $user->id]);
-        $event = Event::factory()->create(['user_id' => $user->id, 'client_id' => $client->id]);
+        $session = Session::factory()->create(['user_id' => $user->id, 'client_id' => $client->id]);
         $payload = [
             'client_id' => $client->id,
             'title' => 'Sessão Editada',
@@ -83,18 +83,18 @@ class EventTest extends TestCase
             'payment_status' => 'pago',
         ];
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->putJson('/api/events/' . $event->id, $payload);
+            ->putJson('/api/sessions/' . $session->id, $payload);
         $response->assertStatus(200)
             ->assertJsonFragment(['title' => 'Sessão Editada']);
     }
 
-    public function test_delete_event()
+    public function test_delete_session()
     {
         [$user, $token] = $this->authUser();
         $client = Client::factory()->create(['user_id' => $user->id]);
-        $event = Event::factory()->create(['user_id' => $user->id, 'client_id' => $client->id]);
+        $session = Session::factory()->create(['user_id' => $user->id, 'client_id' => $client->id]);
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->deleteJson('/api/events/' . $event->id);
+            ->deleteJson('/api/sessions/' . $session->id);
         $response->assertStatus(200)
             ->assertJson(['message' => 'Evento deletado com sucesso.']);
     }
@@ -103,7 +103,7 @@ class EventTest extends TestCase
     {
         [$user, $token] = $this->authUser();
         $client = Client::factory()->create(['user_id' => $user->id]);
-        Event::factory()->create([
+        Session::factory()->create([
             'user_id' => $user->id,
             'client_id' => $client->id,
             'start_time' => now()->addHour(),

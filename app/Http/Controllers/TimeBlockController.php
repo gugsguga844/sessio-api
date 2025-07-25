@@ -219,7 +219,7 @@ class TimeBlockController extends Controller
         }
         
         // Verifica conflito com eventos
-        $eventQuery = \App\Models\Event::where('user_id', $userId)
+        $eventQuery = \App\Models\Session::where('user_id', $userId)
             ->where(function($q) use ($start, $end) {
                 $q->whereBetween('start_time', [$start, $end])
                   ->orWhereBetween('end_time', [$start, $end])

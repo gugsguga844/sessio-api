@@ -9,14 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sessions', function (Blueprint $table) {
-            $table->string('meeting_url', 255)->nullable()->after('type');
+            $table->string('payment_method', 50)->nullable()->after('payment_status');
         });
     }
 
     public function down(): void
     {
         Schema::table('sessions', function (Blueprint $table) {
-            $table->dropColumn('meeting_url');
+            $table->dropColumn('payment_method');
         });
     }
 }; 

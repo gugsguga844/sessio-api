@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
-use App\Http\Controllers\EventController;
+use App\Http\Controllers\SessionController;
 use App\Http\Controllers\TimeBlockController;
 
 /*
@@ -35,8 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->apiResource('clients', ClientController::class);
-Route::middleware('auth:sanctum')->apiResource('sessions', EventController::class);
+Route::middleware('auth:sanctum')->apiResource('sessions', SessionController::class);
 Route::middleware('auth:sanctum')->apiResource('time-blocks', TimeBlockController::class);
 
-Route::middleware('auth:sanctum')->get('calendar-items', [EventController::class, 'calendarItems']);
+Route::middleware('auth:sanctum')->get('calendar-items', [SessionController::class, 'calendarItems']);
 Route::middleware('auth:sanctum')->post('/upload-image', [App\Http\Controllers\ImageUploadController::class, 'upload']);

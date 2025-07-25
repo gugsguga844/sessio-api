@@ -7,9 +7,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @OA\Schema(
- *     schema="Event",
- *     title="Event",
- *     description="Event model",
+ *     schema="Session",
+ *     title="Session",
+ *     description="Session model",
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="user_id", type="integer", example=1),
  *     @OA\Property(
@@ -30,35 +30,36 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="type", type="string", enum={"In-person", "Online"}, example="In-person"),
  *     @OA\Property(property="meeting_url", type="string", format="uri", nullable=true, example="https://meet.google.com/abc-defg-hij"),
  *     @OA\Property(property="payment_status", type="string", enum={"Pending", "Paid"}, example="Pending"),
+ *     @OA\Property(property="payment_method", type="string", nullable=true, example="Pix"),
  *     @OA\Property(property="session_status", type="string", enum={"Scheduled", "Completed", "Canceled"}, example="Scheduled"),
+ *     @OA\Property(property="price", type="number", format="float", nullable=true, example=250.00),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-07-08T12:00:00Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-07-08T12:00:00Z")
  * )
  *
  * @OA\Schema(
- *     schema="EventRequest",
- *     title="Event Request",
- *     description="Request payload for creating/updating an event",
+ *     schema="SessionRequest",
+ *     title="Session Request",
+ *     description="Request payload for creating/updating a session",
  *     oneOf={
  *         @OA\Schema(
- *             required={"client_id", "start_time", "duration_min", "type", "payment_status"},
- *             @OA\Property(property="client_id", type="integer", example=1)
- *         ),
- *         @OA\Schema(
- *             required={"client_ids", "start_time", "duration_min", "type", "payment_status"},
- *             @OA\Property(property="client_ids", type="array", @OA\Items(type="integer"), example={1,2,3})
+ *             required={"client_ids", "start_time", "duration_min", "type", "payment_status", "session_status"},
+ *             @OA\Property(property="client_ids", type="array", @OA\Items(type="integer"), example={1,2,3}),
+ *             @OA\Property(property="start_time", type="string", format="date-time", example="2025-07-08T14:00:00Z"),
+ *             @OA\Property(property="duration_min", type="integer", example=60),
+ *             @OA\Property(property="focus_topic", type="string", nullable=true, example="Ansiedade e estresse no trabalho"),
+ *             @OA\Property(property="session_notes", type="string", nullable=true, example="Paciente relatou melhora nos sintomas de ansiedade após as técnicas de respiração."),
+ *             @OA\Property(property="type", type="string", enum={"In-person", "Online"}, example="Online"),
+ *             @OA\Property(property="meeting_url", type="string", format="uri", nullable=true, example="https://meet.google.com/abc-defg-hij"),
+ *             @OA\Property(property="payment_status", type="string", enum={"Pending", "Paid"}, example="Paid"),
+ *             @OA\Property(property="payment_method", type="string", nullable=true, example="Cartão de Crédito"),
+ *             @OA\Property(property="price", type="number", format="float", nullable=true, example=350.00),
+ *             @OA\Property(property="session_status", type="string", enum={"Scheduled", "Completed", "Canceled"}, example="Completed")
  *         )
- *     },
- *     @OA\Property(property="start_time", type="string", format="date-time", example="2025-07-08T14:00:00Z"),
- *     @OA\Property(property="duration_min", type="integer", example=60, minimum=1, maximum=1440),
- *     @OA\Property(property="focus_topic", type="string", nullable=true, example="Ansiedade e estresse no trabalho"),
- *     @OA\Property(property="session_notes", type="string", nullable=true, example="Paciente relatou melhora nos sintomas de ansiedade após as técnicas de respiração."),
- *     @OA\Property(property="type", type="string", enum={"In-person", "Online"}, example="In-person"),
- *     @OA\Property(property="payment_status", type="string", enum={"Pending", "Paid"}, example="Pending"),
- *     @OA\Property(property="session_status", type="string", enum={"Scheduled", "Completed", "Canceled"}, example="Scheduled")
+ *     }
  * )
  */
-class EventResource extends JsonResource
+class SessionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -85,7 +86,9 @@ class EventResource extends JsonResource
             'type' => $this->type,
             'meeting_url' => $this->meeting_url,
             'payment_status' => $this->payment_status,
+            'payment_method' => $this->payment_method,
             'session_status' => $this->session_status,
+            'price' => $this->price,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
