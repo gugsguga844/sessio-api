@@ -18,7 +18,7 @@ class EventController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/api/events",
+     *     path="/api/sessions",
      *     summary="Listar todas as sessões do usuário autenticado",
      *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
@@ -52,7 +52,7 @@ class EventController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/events",
+     *     path="/api/sessions",
      *     summary="Criar nova sessão (individual ou em grupo)",
      *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
@@ -108,7 +108,7 @@ class EventController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/events/{id}",
+     *     path="/api/sessions/{id}",
      *     summary="Exibir uma sessão específica",
      *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
@@ -144,7 +144,7 @@ class EventController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/events/{id}",
+     *     path="/api/sessions/{id}",
      *     summary="Atualizar uma sessão (individual ou em grupo)",
      *     tags={"Sessions"},
      *     security={{"sanctum":{}}},
@@ -208,7 +208,7 @@ class EventController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/events/{id}",
+     *     path="/api/sessions/{id}",
      *     summary="Excluir uma sessão",
      *     tags={"Sessions"},
      *     security={{"sanctum":{}}},

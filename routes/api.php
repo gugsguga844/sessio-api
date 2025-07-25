@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->apiResource('clients', ClientController::class);
-Route::middleware('auth:sanctum')->apiResource('events', EventController::class);
+Route::middleware('auth:sanctum')->apiResource('sessions', EventController::class);
 Route::middleware('auth:sanctum')->apiResource('time-blocks', TimeBlockController::class);
 
 Route::middleware('auth:sanctum')->get('calendar-items', [EventController::class, 'calendarItems']);

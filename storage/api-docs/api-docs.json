@@ -691,13 +691,13 @@
                 ]
             }
         },
-        "/api/events": {
+        "/api/sessions": {
             "get": {
                 "tags": [
                     "Sessions"
                 ],
                 "summary": "Listar todas as sessões do usuário autenticado",
-                "operationId": "7058ab7c89d20c752b6afd6d808f6526",
+                "operationId": "4f67b9ceecd28427b18e631bf3fdc1db",
                 "responses": {
                     "200": {
                         "description": "Lista de sessões",
@@ -724,7 +724,7 @@
                     "Sessions"
                 ],
                 "summary": "Criar nova sessão (individual ou em grupo)",
-                "operationId": "508895e03d7f10edac84357084c87b20",
+                "operationId": "659fe1f5c960279f2c1ff4c98a64001a",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -760,13 +760,13 @@
                 ]
             }
         },
-        "/api/events/{id}": {
+        "/api/sessions/{id}": {
             "get": {
                 "tags": [
                     "Sessions"
                 ],
                 "summary": "Exibir uma sessão específica",
-                "operationId": "6f743f71f7a88dbe57be1d9c9ebf47cb",
+                "operationId": "50fec02dc902510dd1a9f29993a9901a",
                 "parameters": [
                     {
                         "name": "id",
@@ -807,7 +807,7 @@
                     "Sessions"
                 ],
                 "summary": "Atualizar uma sessão (individual ou em grupo)",
-                "operationId": "fb130dcf1ab4d7abbd3a173741df1f8f",
+                "operationId": "3a7c453082a54c837f0ff42ba5b6bc75",
                 "parameters": [
                     {
                         "name": "id",
@@ -864,7 +864,7 @@
                     "Sessions"
                 ],
                 "summary": "Excluir uma sessão",
-                "operationId": "b8c8f4b41a32532f5e9f7146e511bc61",
+                "operationId": "19c69ef4ff4a573655e5ace75068fdbd",
                 "parameters": [
                     {
                         "name": "id",
@@ -1456,6 +1456,12 @@
                             "Online"
                         ],
                         "example": "In-person"
+                    },
+                    "meeting_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://meet.google.com/abc-defg-hij",
+                        "nullable": true
                     },
                     "payment_status": {
                         "type": "string",
