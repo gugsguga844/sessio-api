@@ -11,29 +11,42 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('events', function (Blueprint $table) {
+        // Verificar se a tabela events ainda existe
+        if (Schema::hasTable('events')) {
+            $tableName = 'events';
+        } 
+        // Se não existir, verificar se a tabela sessions existe
+        elseif (Schema::hasTable('sessions')) {
+            $tableName = 'sessions';
+        } 
+        // Se nenhuma das tabelas existir, não há nada para fazer
+        else {
+            return;
+        }
+
+        Schema::table($tableName, function (Blueprint $table) use ($tableName) {
             // Remover colunas não utilizadas
-            if (Schema::hasColumn('events', 'title')) {
+            if (Schema::hasColumn($tableName, 'title')) {
                 $table->dropColumn('title');
             }
-            if (Schema::hasColumn('events', 'end_time')) {
+            if (Schema::hasColumn($tableName, 'end_time')) {
                 $table->dropColumn('end_time');
             }
-            if (Schema::hasColumn('events', 'notes')) {
+            if (Schema::hasColumn($tableName, 'notes')) {
                 $table->dropColumn('notes');
             }
 
             // Adicionar campos necessários
-            if (!Schema::hasColumn('events', 'duration_min')) {
+            if (!Schema::hasColumn($tableName, 'duration_min')) {
             $table->integer('duration_min')->after('start_time');
             }
-            if (!Schema::hasColumn('events', 'focus_topic')) {
+            if (!Schema::hasColumn($tableName, 'focus_topic')) {
             $table->text('focus_topic')->nullable()->after('duration_min');
             }
-            if (!Schema::hasColumn('events', 'session_notes')) {
+            if (!Schema::hasColumn($tableName, 'session_notes')) {
             $table->text('session_notes')->nullable()->after('focus_topic');
             }
-            if (!Schema::hasColumn('events', 'session_status')) {
+            if (!Schema::hasColumn($tableName, 'session_status')) {
                 $table->string('session_status', 20)->default('Scheduled')->after('payment_status');
             }
             
@@ -53,18 +66,31 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('events', function (Blueprint $table) {
+        // Verificar se a tabela events ainda existe
+        if (Schema::hasTable('events')) {
+            $tableName = 'events';
+        } 
+        // Se não existir, verificar se a tabela sessions existe
+        elseif (Schema::hasTable('sessions')) {
+            $tableName = 'sessions';
+        } 
+        // Se nenhuma das tabelas existir, não há nada para fazer
+        else {
+            return;
+        }
+
+        Schema::table($tableName, function (Blueprint $table) use ($tableName) {
             // Remover campos adicionados
-            if (Schema::hasColumn('events', 'duration_min')) {
+            if (Schema::hasColumn($tableName, 'duration_min')) {
                 $table->dropColumn('duration_min');
             }
-            if (Schema::hasColumn('events', 'focus_topic')) {
+            if (Schema::hasColumn($tableName, 'focus_topic')) {
                 $table->dropColumn('focus_topic');
             }
-            if (Schema::hasColumn('events', 'session_notes')) {
+            if (Schema::hasColumn($tableName, 'session_notes')) {
                 $table->dropColumn('session_notes');
             }
-            if (Schema::hasColumn('events', 'session_status')) {
+            if (Schema::hasColumn($tableName, 'session_status')) {
                 $table->dropColumn('session_status');
             }
             
