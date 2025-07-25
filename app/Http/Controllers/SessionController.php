@@ -75,35 +75,77 @@ class SessionController extends Controller
      */
     public function store(SessionRequest $request)
     {
-        $validated = $request->validated();
-        $validated['user_id'] = Auth::id();
+        try {
+            \Log::info('Iniciando criação de sessão', ['request' => $request->all()]);
+            $validated = $request->validated();
+            $validated['user_id'] = Auth::id();
+            
+            // Se tivermos client_ids, usamos o primeiro como client_id principal
+            // para manter a compatibilidade com a estrutura do banco de dados
+            if (isset($validated['client_ids']) && !empty($validated['client_ids'])) {
+                $validated['client_id'] = $validated['client_ids'][0];
+            }
+            
+            \Log::info('Dados validados', $validated);
 
-        // Calcular end_time baseado em start_time + duration_min
-        $startTime = new \DateTime($validated['start_time']);
-        $endTime = (clone $startTime)->modify("+{$validated['duration_min']} minutes");
+            // Calcular end_time baseado em start_time + duration_min
+            $startTime = new \DateTime($validated['start_time']);
+            $endTime = (clone $startTime)->modify("+{$validated['duration_min']} minutes");
 
-        // Lógica de conflito de horário
-        if ($this->hasTimeConflict($validated['start_time'], $endTime->format('Y-m-d H:i:s'), Auth::id())) {
+            // Lógica de conflito de horário
+            if ($this->hasTimeConflict($validated['start_time'], $endTime->format('Y-m-d H:i:s'), Auth::id())) {
+                return response()->json([
+                    'message' => 'Conflito de horário detectado. Este horário já está ocupado por outra sessão ou bloqueio.'
+                ], 409);
+            }
+
+            // Criação da sessão
+            \Log::info('Criando sessão', $validated);
+            $session = Session::create($validated);
+            \Log::info('Sessão criada', ['session_id' => $session->id]);
+
+            // Participantes: múltiplos ou único
+            $clientIds = [];
+            if (isset($validated['client_ids'])) {
+                $clientIds = $validated['client_ids'];
+            } elseif (isset($validated['client_id'])) {
+                $clientIds = [$validated['client_id']];
+            }
+            
+            \Log::info('IDs de clientes para adicionar', $clientIds);
+            
+            // Adicionar participantes à sessão
+            if (!empty($clientIds)) {
+                $participants = [];
+                foreach ($clientIds as $clientId) {
+                    $participants[] = [
+                        'session_id' => $session->id, 
+                        'client_id' => $clientId
+                    ];
+                }
+                
+                \Log::info('Preparando para inserir participantes', $participants);
+                
+                // Usar insert para evitar problemas com chave primária composta
+                if (!empty($participants)) {
+                    DB::table('session_participants')->insert($participants);
+                    \Log::info('Participantes adicionados com sucesso');
+                }
+            }
+
+            $session->load(['participants', 'user']);
+            \Log::info('Sessão criada com sucesso', $session->toArray());
+            return new SessionResource($session);
+        } catch (\Exception $e) {
+            \Log::error('Erro ao criar sessão', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
-                'message' => 'Conflito de horário detectado. Este horário já está ocupado por outra sessão ou bloqueio.'
-            ], 409);
+                'error' => 'Erro ao criar sessão',
+                'details' => $e->getMessage()
+            ], 500);
         }
-
-        // Criação da sessão
-        $session = Session::create($validated);
-
-        // Participantes: múltiplos ou único
-        $clientIds = [];
-        if (isset($validated['client_ids'])) {
-            $clientIds = $validated['client_ids'];
-        } elseif (isset($validated['client_id'])) {
-            $clientIds = [$validated['client_id']];
-        }
-        if ($clientIds) {
-            $session->participants()->sync($clientIds);
-        }
-
-        return new SessionResource($session->load(['participants', 'user']));
     }
 
     /**
