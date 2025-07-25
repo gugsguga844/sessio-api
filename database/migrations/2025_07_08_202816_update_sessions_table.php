@@ -55,9 +55,14 @@ return new class extends Migration
             $table->string('type', 20)->nullable(false)->change();
             $table->string('payment_status', 20)->default('Pending')->change();
             
-            // Adicionar índices
-            $table->index('start_time');
-            $table->index('session_status');
+            // Adicionar índices apenas se não existirem
+            if (!Schema::hasIndex($tableName, $tableName.'_start_time_index')) {
+                $table->index('start_time');
+            }
+            
+            if (!Schema::hasIndex($tableName, $tableName.'_session_status_index')) {
+                $table->index('session_status');
+            }
         });
     }
 
