@@ -34,12 +34,23 @@ class SessionController extends Controller
      */
     public function index()
     {
-        $sessions = Session::where('user_id', Auth::id())
-            ->with(['client', 'user'])
-            ->orderBy('start_time', 'desc')
-            ->get();
+        try {
+            $sessions = Session::where('user_id', Auth::id())
+                ->with(['participants', 'user'])
+                ->orderBy('start_time', 'desc')
+                ->get();
 
-        return SessionResource::collection($sessions);
+            return SessionResource::collection($sessions);
+        } catch (\Exception $e) {
+            \Log::error('Erro ao listar sessões', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'error' => 'Erro ao listar sessões',
+                'details' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
