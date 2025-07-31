@@ -41,6 +41,29 @@ class SessionRequest extends FormRequest
     /**
      * Get custom messages for validator errors.
      */
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        // Se o usuário enviar um timezone, podemos usá-lo para converter para UTC
+        $timezone = $this->input('timezone', config('app.timezone'));
+        
+        if ($this->has('start_time')) {
+            try {
+                $startTime = new \DateTime($this->input('start_time'), new \DateTimeZone($timezone));
+                $this->merge([
+                    'start_time' => $startTime->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
+                ]);
+            } catch (\Exception $e) {
+                // Se houver erro na conversão, mantém o valor original
+            }
+        }
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     */
     public function messages(): array
     {
         return [

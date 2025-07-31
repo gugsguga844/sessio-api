@@ -375,6 +375,90 @@ class SessionController extends Controller
      *     @OA\Response(response=422, description="Dados inválidos")
      * )
      */
+    /**
+     * @OA\Get(
+     *     path="/api/dashboard/statistics",
+     *     summary="Obter estatísticas do dashboard",
+     *     tags={"Dashboard"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Estatísticas do dashboard",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="monthly_revenue", type="object",
+     *                 @OA\Property(property="current_value", type="number", format="float", example=4550.50),
+     *                 @OA\Property(property="comparison_previous_month_percentage", type="number", format="float", example=15)
+     *             ),
+     *             @OA\Property(property="sessions_today", type="object",
+     *                 @OA\Property(property="completed", type="integer", example=2),
+     *                 @OA\Property(property="total", type="integer", example=5)
+     *             ),
+     *             @OA\Property(property="pending_payments", type="object",
+     *                 @OA\Property(property="count", type="integer", example=3),
+     *                 @OA\Property(property="total_value", type="number", format="float", example=450.00)
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function dashboardStatistics()
+    {
+        $userId = Auth::id();
+        $now = now();
+        $today = $now->copy()->startOfDay();
+        
+        // Faturamento do mês atual
+        $currentMonthRevenue = Session::where('user_id', $userId)
+            ->where('payment_status', Session::PAYMENT_PAID)
+            ->whereYear('start_time', $now->year)
+            ->whereMonth('start_time', $now->month)
+            ->sum('price');
+
+        // Faturamento do mês anterior
+        $lastMonthRevenue = Session::where('user_id', $userId)
+            ->where('payment_status', Session::PAYMENT_PAID)
+            ->whereYear('start_time', $now->copy()->subMonth()->year)
+            ->whereMonth('start_time', $now->copy()->subMonth()->month)
+            ->sum('price');
+
+        // Cálculo da variação percentual
+        $revenuePercentageChange = $lastMonthRevenue > 0 
+            ? round((($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 2)
+            : 100;
+
+        // Sessões de hoje
+        $todaySessions = Session::where('user_id', $userId)
+            ->whereDate('start_time', $today)
+            ->get();
+
+        $completedToday = $todaySessions->where('session_status', Session::STATUS_COMPLETED)->count();
+        $totalToday = $todaySessions->count();
+
+        // Pagamentos pendentes
+        $pendingPayments = Session::where('user_id', $userId)
+            ->where('session_status', Session::STATUS_COMPLETED)
+            ->where('payment_status', '!=', Session::PAYMENT_PAID)
+            ->get();
+
+        $pendingCount = $pendingPayments->count();
+        $pendingTotal = $pendingPayments->sum('price');
+
+        return response()->json([
+            'monthly_revenue' => [
+                'current_value' => (float) $currentMonthRevenue,
+                'comparison_previous_month_percentage' => $revenuePercentageChange
+            ],
+            'sessions_today' => [
+                'completed' => $completedToday,
+                'total' => $totalToday
+            ],
+            'pending_payments' => [
+                'count' => $pendingCount,
+                'total_value' => (float) $pendingTotal
+            ]
+        ]);
+    }
+
     public function calendarItems(CalendarItemsRequest $request)
     {
         $validated = $request->validated();

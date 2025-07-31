@@ -39,4 +39,5 @@ Route::middleware('auth:sanctum')->apiResource('sessions', SessionController::cl
 Route::middleware('auth:sanctum')->apiResource('time-blocks', TimeBlockController::class);
 
 Route::middleware('auth:sanctum')->get('calendar-items', [SessionController::class, 'calendarItems']);
+Route::middleware('auth:sanctum')->get('dashboard/statistics', [SessionController::class, 'dashboardStatistics']);
 Route::middleware('auth:sanctum')->post('/upload-image', [App\Http\Controllers\ImageUploadController::class, 'upload']);

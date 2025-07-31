@@ -71,13 +71,15 @@ class SessionResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'participants' => $this->participants ? $this->participants->map(function($c) {
-                return [
-                    'id' => $c->id,
-                    'full_name' => $c->full_name,
-                    'email' => $c->email,
-                ];
-            }) : [],
+            'participants' => $this->whenLoaded('participants', function () {
+                return $this->participants->map(function ($participant) {
+                    return [
+                        'id' => $participant->id,
+                        'full_name' => $participant->full_name,
+                        'email' => $participant->email,
+                    ];
+                });
+            }),
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
             'duration_min' => $this->duration_min,
@@ -89,6 +91,7 @@ class SessionResource extends JsonResource
             'payment_method' => $this->payment_method,
             'session_status' => $this->session_status,
             'price' => $this->price,
+            'timezone' => 'UTC', // Sempre retornamos UTC para referência
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
