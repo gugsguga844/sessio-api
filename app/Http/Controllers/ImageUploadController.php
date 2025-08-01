@@ -66,10 +66,10 @@ class ImageUploadController extends Controller
                 ], 400);
             }
 
-            // Configuração do S3 usando as configurações do .env
+            // Configuração do S3 para a região us-east-2
             $s3Client = new S3Client([
                 'version' => 'latest',
-                'region'  => config('filesystems.disks.s3.region'),
+                'region'  => 'us-east-2', // Forçando a região correta
                 'credentials' => [
                     'key'    => config('filesystems.disks.s3.key'),
                     'secret' => config('filesystems.disks.s3.secret'),
@@ -87,8 +87,8 @@ class ImageUploadController extends Controller
                 'Body'   => $file->get()
             ]);
 
-            // Gera a URL pública
-            $url = $result['ObjectURL'];
+            // Gera a URL pública usando o formato correto para a região us-east-2
+            $url = "https://sessio-files.s3.us-east-2.amazonaws.com/" . $path;
 
             return response()->json([
                 'message' => 'Upload realizado com sucesso!',
