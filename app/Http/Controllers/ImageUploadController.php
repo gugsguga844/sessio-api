@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Aws\S3\S3Client;
 
 class ImageUploadController extends Controller
 {
@@ -43,21 +45,69 @@ class ImageUploadController extends Controller
      *     )
      * )
      */
-    public function upload(Request $request)
+        public function upload(Request $request)
     {
-        $validated = $request->validate([
-            'image' => 'required|image|max:2048',
-        ]);
+        try {
+            // Validação básica
+            if (!$request->hasFile('image')) {
+                return response()->json([
+                    'message' => 'Nenhuma imagem foi enviada',
+                    'error' => 'Arquivo não encontrado'
+                ], 400);
+            }
 
-        $path = $request->file('image')->store('images', 's3');
-        Storage::disk('s3')->setVisibility($path, 'public');
-        $url = Storage::disk('s3')->url($path);
+            $file = $request->file('image');
+            
+            // Validação do tipo de arquivo
+            if (!$file->isValid()) {
+                return response()->json([
+                    'message' => 'Arquivo inválido',
+                    'error' => 'Arquivo corrompido ou inválido'
+                ], 400);
+            }
 
-        return response()->json([
-            'message' => 'Upload realizado com sucesso!',
-            'path' => $path,
-            'url' => $url,
-        ]);
+            // Configuração do S3 usando as configurações do .env
+            $s3Client = new S3Client([
+                'version' => 'latest',
+                'region'  => config('filesystems.disks.s3.region'),
+                'credentials' => [
+                    'key'    => config('filesystems.disks.s3.key'),
+                    'secret' => config('filesystems.disks.s3.secret'),
+                ],
+            ]);
+
+            // Gera um nome único para o arquivo
+            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = 'images/' . $fileName;
+
+            // Upload direto para S3
+            $result = $s3Client->putObject([
+                'Bucket' => config('filesystems.disks.s3.bucket'),
+                'Key'    => $path,
+                'Body'   => $file->get()
+            ]);
+
+            // Gera a URL pública
+            $url = $result['ObjectURL'];
+
+            return response()->json([
+                'message' => 'Upload realizado com sucesso!',
+                'path' => $path,
+                'url' => $url,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erro no upload de imagem', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'message' => 'Erro interno do servidor',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function update(Request $request)
@@ -65,7 +115,9 @@ class ImageUploadController extends Controller
         $validated = $request->validate([
             'image' => 'required|image|max:2048',
         ]);
-        
-        
+
+
     }
-} 
+
+
+}

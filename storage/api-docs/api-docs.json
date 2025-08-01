@@ -967,68 +967,67 @@
                 ]
             }
         },
-        "/api/calendar-items": {
+        "/api/dashboard/statistics": {
             "get": {
                 "tags": [
-                    "Calendar"
+                    "Dashboard"
                 ],
-                "summary": "Listar todos os itens do calendário (sessões e bloqueios) em um período",
-                "operationId": "77c5a5e94b04eeb057312b0893275c9e",
-                "parameters": [
-                    {
-                        "name": "start",
-                        "in": "query",
-                        "description": "Data de início do período (YYYY-MM-DD)",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "end",
-                        "in": "query",
-                        "description": "Data de término do período (YYYY-MM-DD)",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    }
-                ],
+                "summary": "Obter estatísticas do dashboard",
+                "operationId": "dc5006c7ad66913119b754164872393b",
                 "responses": {
                     "200": {
-                        "description": "Lista de itens do calendário",
+                        "description": "Estatísticas do dashboard",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "item_type": {
-                                                "type": "string",
-                                                "enum": [
-                                                    "session",
-                                                    "block"
-                                                ]
-                                            }
-                                        },
-                                        "type": "object",
-                                        "oneOf": [
-                                            {
-                                                "$ref": "#/components/schemas/Session"
+                                    "properties": {
+                                        "monthly_revenue": {
+                                            "properties": {
+                                                "current_value": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 4550.5
+                                                },
+                                                "comparison_previous_month_percentage": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 15
+                                                }
                                             },
-                                            {
-                                                "$ref": "#/components/schemas/TimeBlock"
-                                            }
-                                        ]
-                                    }
+                                            "type": "object"
+                                        },
+                                        "sessions_today": {
+                                            "properties": {
+                                                "completed": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "pending_payments": {
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "total_value": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 450
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
-                    },
-                    "422": {
-                        "description": "Dados inválidos"
                     }
                 },
                 "security": [
@@ -1958,8 +1957,8 @@
             "description": "Sessions"
         },
         {
-            "name": "Calendar",
-            "description": "Calendar"
+            "name": "Dashboard",
+            "description": "Dashboard"
         },
         {
             "name": "TimeBlocks",

@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\TimeBlockController;
+use App\Http\Controllers\ImageUploadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,4 +41,9 @@ Route::middleware('auth:sanctum')->apiResource('time-blocks', TimeBlockControlle
 
 Route::middleware('auth:sanctum')->get('calendar-items', [SessionController::class, 'calendarItems']);
 Route::middleware('auth:sanctum')->get('dashboard/statistics', [SessionController::class, 'dashboardStatistics']);
-Route::middleware('auth:sanctum')->post('/upload-image', [App\Http\Controllers\ImageUploadController::class, 'upload']);
+// Rota de upload de imagem
+Route::middleware('auth:sanctum')->post('upload-image', [ImageUploadController::class, 'upload']);
+
+
+
+
