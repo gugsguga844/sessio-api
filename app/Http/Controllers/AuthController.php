@@ -240,6 +240,12 @@ class AuthController extends Controller
             'image_url' => 'sometimes|nullable|url',
         ]);
 
+        // Mapeia image_url para avatar_url se existir
+        if (isset($validated['image_url'])) {
+            $validated['avatar_url'] = $validated['image_url'];
+            unset($validated['image_url']);
+        }
+
         $user->update($validated);
 
         return response()->json([

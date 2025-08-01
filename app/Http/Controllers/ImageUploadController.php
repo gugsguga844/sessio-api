@@ -57,7 +57,7 @@ class ImageUploadController extends Controller
             }
 
             $file = $request->file('image');
-            
+
             // Validação do tipo de arquivo
             if (!$file->isValid()) {
                 return response()->json([
