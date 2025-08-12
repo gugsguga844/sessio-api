@@ -90,13 +90,13 @@ class SessionController extends Controller
             \Log::info('Iniciando criação de sessão', ['request' => $request->all()]);
             $validated = $request->validated();
             $validated['user_id'] = Auth::id();
-            
+
             // Se tivermos client_ids, usamos o primeiro como client_id principal
             // para manter a compatibilidade com a estrutura do banco de dados
             if (isset($validated['client_ids']) && !empty($validated['client_ids'])) {
                 $validated['client_id'] = $validated['client_ids'][0];
             }
-            
+
             \Log::info('Dados validados', $validated);
 
             // Calcular end_time baseado em start_time + duration_min
@@ -122,21 +122,21 @@ class SessionController extends Controller
             } elseif (isset($validated['client_id'])) {
                 $clientIds = [$validated['client_id']];
             }
-            
+
             \Log::info('IDs de clientes para adicionar', $clientIds);
-            
+
             // Adicionar participantes à sessão
             if (!empty($clientIds)) {
                 $participants = [];
                 foreach ($clientIds as $clientId) {
                     $participants[] = [
-                        'session_id' => $session->id, 
+                        'session_id' => $session->id,
                         'client_id' => $clientId
                     ];
                 }
-                
+
                 \Log::info('Preparando para inserir participantes', $participants);
-                
+
                 // Usar insert para evitar problemas com chave primária composta
                 if (!empty($participants)) {
                     DB::table('session_participants')->insert($participants);
@@ -387,6 +387,7 @@ class SessionController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="monthly_revenue", type="object",
      *                 @OA\Property(property="current_value", type="number", format="float", example=4550.50),
+     *                 @OA\Property(property="previous_month_value", type="number", format="float", example=3956.96),
      *                 @OA\Property(property="comparison_previous_month_percentage", type="number", format="float", example=15)
      *             ),
      *             @OA\Property(property="sessions_today", type="object",
@@ -406,7 +407,7 @@ class SessionController extends Controller
         $userId = Auth::id();
         $now = now();
         $today = $now->copy()->startOfDay();
-        
+
         // Faturamento do mês atual
         $currentMonthRevenue = Session::where('user_id', $userId)
             ->where('payment_status', Session::PAYMENT_PAID)
@@ -422,7 +423,7 @@ class SessionController extends Controller
             ->sum('price');
 
         // Cálculo da variação percentual
-        $revenuePercentageChange = $lastMonthRevenue > 0 
+        $revenuePercentageChange = $lastMonthRevenue > 0
             ? round((($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 2)
             : 100;
 
@@ -446,6 +447,7 @@ class SessionController extends Controller
         return response()->json([
             'monthly_revenue' => [
                 'current_value' => (float) $currentMonthRevenue,
+                'previous_month_value' => (float) $lastMonthRevenue,
                 'comparison_previous_month_percentage' => $revenuePercentageChange
             ],
             'sessions_today' => [
