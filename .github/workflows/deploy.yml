@@ -90,6 +90,6 @@ jobs:
             QUEUE_CONNECTION=sync
             EOF
 
-            # Pull latest image and (re)start
-            IMAGE=ghcr.io/${{ github.repository }}:latest docker compose -f docker-compose.prod.yml pull
-            IMAGE=ghcr.io/${{ github.repository }}:latest docker compose -f docker-compose.prod.yml up -d
+            # Pull latest image and (re)start (compose file at repo root on server)
+            IMAGE=ghcr.io/${{ github.repository }}:latest docker compose -f ~/apps/sessio-api/docker-compose.prod.yml pull
+            IMAGE=ghcr.io/${{ github.repository }}:latest docker compose -f ~/apps/sessio-api/docker-compose.prod.yml up -d
