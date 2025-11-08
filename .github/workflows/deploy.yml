@@ -108,6 +108,9 @@ jobs:
             echo "Listing deploy folder:"
             ls -la deploy || true
 
+            echo "Previewing .env keys (values hidden):"
+            grep -E '^(APP_|DB_|FRONTEND_URL|SANCTUM_STATEFUL_DOMAINS|SESSION_DOMAIN|SESSION_DRIVER|CACHE_DRIVER|QUEUE_CONNECTION)=' .env | sed -E 's/=.*/=<hidden>/' || true
+
             # Pull latest image and (re)start (compose file located in deploy/)
-            IMAGE=ghcr.io/${{ github.repository }}:latest docker compose -f ~/apps/sessio-api/deploy/docker-compose.prod.yml pull
-            IMAGE=ghcr.io/${{ github.repository }}:latest docker compose -f ~/apps/sessio-api/deploy/docker-compose.prod.yml up -d
+            IMAGE=ghcr.io/${{ github.repository }}:latest docker compose --env-file ~/apps/sessio-api/.env -f ~/apps/sessio-api/deploy/docker-compose.prod.yml pull
+            IMAGE=ghcr.io/${{ github.repository }}:latest docker compose --env-file ~/apps/sessio-api/.env -f ~/apps/sessio-api/deploy/docker-compose.prod.yml up -d
