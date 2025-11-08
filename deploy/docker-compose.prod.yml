@@ -6,7 +6,7 @@ services:
     container_name: sessio_app
     restart: unless-stopped
     env_file:
-      - .env
+      - ../.env
     depends_on:
       - db
     networks:
